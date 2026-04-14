@@ -43,13 +43,17 @@ export const SCORING_CONFIG: ScoringConfig = {
     save_more: { foundation_builder: 1, digital_optimizer: 1, early_wealth_starter: 1 },
     start_investing: { early_wealth_starter: 3, digital_optimizer: 1 },
     manage_debt: { foundation_builder: 2, traditional_hybrid: 1 },
-    get_organized: { digital_optimizer: 2, traditional_hybrid: 1 },
+    // Increased traditional_hybrid: 1 → 2. "Get organized" correlates strongly with wanting
+    // a consolidated, predictable banking relationship — Chase's ecosystem fits this well.
+    get_organized: { digital_optimizer: 2, traditional_hybrid: 2 },
   },
 
   debtSituation: {
     carries_balance: { foundation_builder: 2 },
     occasionally: { foundation_builder: 1, digital_optimizer: 1 },
-    pays_in_full: { digital_optimizer: 2, rewards_builder: 2, early_wealth_starter: 1 },
+    // pays_in_full signals discipline and access to premium products, not digital preference.
+    // Removed digital_optimizer: 2 — paying in full is a credit/investing signal, not a banking one.
+    pays_in_full: { rewards_builder: 2, early_wealth_starter: 1 },
     no_card: { foundation_builder: 2 },
   },
 

@@ -56,6 +56,14 @@ const EF_LABEL: Record<EmergencyFund, string> = {
   over_3mo: 'three or more months of expenses saved',
 }
 
+const ARCHETYPE_LABEL: Record<ArchetypeId, string> = {
+  foundation_builder: 'Foundation Builder',
+  digital_optimizer: 'Digital Optimizer',
+  traditional_hybrid: 'Traditional Hybrid',
+  rewards_builder: 'Rewards Builder',
+  early_wealth_starter: 'Early Wealth Starter',
+}
+
 // ─── Checking recommendations ──────────────────────────────────────────────────
 
 function getCheckingRecommendation(archetype: ArchetypeId, answers: UserAnswers): Recommendation {
@@ -173,24 +181,24 @@ function getSavingsRecommendation(archetype: ArchetypeId, answers: UserAnswers):
       return {
         institution: 'amex',
         product: 'American Express High-Yield Savings Account',
-        headline: '4.35% APY — the highest in the Amex ecosystem',
-        why: `With ${income} and Amex credit cards in your stack, consolidating savings at Amex makes the whole financial picture cleaner. At 4.35% APY, it's meaningfully above traditional banks and marginally above Ally. No fees, FDIC insured, and transferable to your Amex checking in one click. Your emergency fund should be earning real yield.`,
+        headline: '4.35% APY — no fees, no minimums, FDIC insured',
+        why: `With ${income}, your emergency fund should be earning real yield — not sitting idle in a traditional bank account earning 0.01%. Amex High-Yield Savings earns 4.35% APY with no fees, no minimum balance, and no conditions. That's $43.50/year on $1,000 versus $0.10 at Chase.`,
         whyNotAlternatives:
-          'Chase Savings pays 0.01% APY — the difference on $10,000 is $434/year. Ally is at 4.20%, which is fine but slightly lower and requires a separate relationship. For someone running Amex cards, the consolidated view is the deciding factor.',
+          "Chase Savings pays 0.01% APY — the difference on $10,000 is $434/year. Ally is a strong alternative at 4.20% but slightly lower. Amex HYSA requires no existing Amex relationship — it's open to anyone and earns from day one with no hoops to jump through.",
         focusNow:
-          'Open Amex HYSA online. Transfer your full emergency fund there today — every month you delay in a low-yield account is real money forfeited. Transfers to/from Amex card accounts settle in 1–3 business days.',
+          'Open Amex HYSA online. Transfer your full emergency fund there today — every month you delay in a low-yield account is real money forfeited. Transfers to/from external accounts settle in 1–3 business days.',
       }
 
     case 'early_wealth_starter':
       return {
-        institution: 'ally',
-        product: 'Ally High-Yield Savings Account',
-        headline: 'Your emergency fund earns 4.20% — investing dollars go to Fidelity',
-        why: `With ${ef} and ${income}, your savings strategy has two parts: emergency fund in high-yield savings, investing dollars in tax-advantaged accounts. Ally at 4.20% APY handles the emergency fund cleanly. Everything above your 3–6 month target gets deployed to your Roth IRA or taxable brokerage — not left to earn savings rate.`,
+        institution: 'sofi',
+        product: 'SoFi Savings (integrated with Checking)',
+        headline: '4.60% APY on your emergency fund — same platform, zero friction',
+        why: `With ${ef} and ${income}, your savings strategy is straightforward: keep your emergency fund earning maximum yield, and deploy everything above it to tax-advantaged investing. SoFi pays 4.60% APY on savings with direct deposit — the same platform as your checking, so sweeping excess cash into the high-yield savings bucket takes seconds, not transfers between banks.`,
         whyNotAlternatives:
-          'SoFi is marginally higher at 4.60% with direct deposit, but your investing goes to Fidelity — not SoFi. Keeping savings and investing at separate platforms gives you the best of each. Ally\'s UX and savings tools are best-in-class for pure savings management.',
+          "Ally earns 4.20% — lower yield and a second app to manage. Since your checking is already at SoFi, moving savings elsewhere costs yield and adds friction without any benefit. The integrated view of checking + savings in one dashboard is materially better than managing two platforms for a $40/year yield difference.",
         focusNow:
-          'Set a target savings balance: 3–6 months of monthly expenses. Park exactly that amount at Ally. Every dollar above that threshold should be moving into your Roth IRA or taxable brokerage at Fidelity — savings rate is not investing rate.',
+          'Enable direct deposit to unlock the full 4.60% savings APY. Set a target savings balance: 3–6 months of monthly expenses. Every dollar above that threshold should flow to your Roth IRA or taxable brokerage at Fidelity — savings rate is not investing rate.',
       }
   }
 }
@@ -238,13 +246,31 @@ function generateNextMoves(
           timeframe: 'Today',
         })
       }
-      moves.push({
-        id: 'habit',
-        title: 'Automate a fixed amount to savings each paycheck',
-        description: 'Decide on a number — $25, $50, $100 — and automate it. Consistency beats optimization at this stage.',
-        priority: 'medium',
-        timeframe: 'Next paycheck',
-      })
+      if (answers.debtSituation === 'carries_balance') {
+        moves.push({
+          id: 'debt',
+          title: 'Pay more than the minimum on every card this billing cycle',
+          description: 'Identify the highest-rate balance and direct any extra cash there. Interest is compounding against you — every dollar above the minimum accelerates payoff and saves more than any savings rate can earn.',
+          priority: 'medium',
+          timeframe: 'Next billing cycle',
+        })
+      } else if (answers.debtSituation === 'occasionally') {
+        moves.push({
+          id: 'autopay',
+          title: 'Set all cards to autopay the full statement balance',
+          description: 'Occasional balance carrying means occasional interest charges. Full-balance autopay eliminates that permanently and protects your score from missed payments.',
+          priority: 'medium',
+          timeframe: 'Today',
+        })
+      } else {
+        moves.push({
+          id: 'retirement',
+          title: 'Open a Roth IRA at Fidelity — start with any amount',
+          description: 'Once your emergency fund is funded, a Roth IRA is the highest-leverage next step. $100/month at 25 becomes ~$350,000 by 65 at average returns. Fidelity has no minimum and no fees.',
+          priority: 'medium',
+          timeframe: 'Next month',
+        })
+      }
       break
 
     case 'digital_optimizer':
@@ -362,9 +388,9 @@ function generateNextMoves(
         timeframe: 'This week',
       })
       moves.push({
-        id: 'ally',
-        title: 'Move emergency fund to Ally at 4.20% APY',
-        description: 'Your emergency fund in a traditional savings account is losing real value. Move it to Ally today.',
+        id: 'sofi-savings',
+        title: 'Enable direct deposit on SoFi to unlock 4.60% savings APY',
+        description: 'Without direct deposit, SoFi savings earns 1.20%. This one step is worth $170+/year on a $5,000 balance. Your emergency fund should be working harder.',
         priority: 'medium',
         timeframe: 'This week',
       })
@@ -395,19 +421,19 @@ function generateExplanation(
 
   switch (primary) {
     case 'foundation_builder':
-      return `With ${income}, ${ef}, and a focus on ${priority}, you're at the start of building a financial base that everything else will sit on top of. The most valuable moves right now aren't about optimization — they're about eliminating fees, establishing credit history, and building consistent savings habits. The ${secondary.replace(/_/g, ' ')} element of your profile means you'll naturally graduate to more sophisticated products in 12–18 months once the foundation is solid.`
+      return `With ${income}, ${ef}, and a focus on ${priority}, you're at the start of building a financial base that everything else will sit on top of. The most valuable moves right now aren't about optimization — they're about eliminating fees, establishing credit history, and building consistent savings habits. The ${ARCHETYPE_LABEL[secondary]} element of your profile means you'll naturally graduate to more sophisticated products in 12–18 months once the foundation is solid.`
 
     case 'digital_optimizer':
-      return `With ${income}, a preference for ${banking}, and a focus on ${priority}, your profile is built for efficiency. You don't need branches or paper statements — you need yield, integration, and zero waste. Every dollar you leave in a low-yield account or spend on bank fees is a dollar working against you. Your ${secondary.replace(/_/g, ' ')} tendencies mean you also value some structure — which is why this stack pairs high-yield automation with a focused credit card strategy.`
+      return `With ${income}, a preference for ${banking}, and a focus on ${priority}, your profile is built for efficiency. You don't need branches or paper statements — you need yield, integration, and zero waste. Every dollar you leave in a low-yield account or spend on bank fees is a dollar working against you. Your ${ARCHETYPE_LABEL[secondary]} tendencies mean you also value some structure — which is why this stack pairs high-yield automation with a focused credit card strategy.`
 
     case 'traditional_hybrid':
-      return `You want ${banking}, which narrows the options significantly — and Chase is the clear answer. With ${income} and a focus on ${priority}, you need a bank that won't disappear when the app is down or when you need to deposit cash. Your ${secondary.replace(/_/g, ' ')} profile means you're also open to optimization — which is why we pair Chase checking (branch access, best app) with Capital One savings (4.25% APY, not Chase's 0.01%).`
+      return `You want ${banking}, which narrows the options significantly — and Chase is the clear answer. With ${income} and a focus on ${priority}, you need a bank that won't disappear when the app is down or when you need to deposit cash. Your ${ARCHETYPE_LABEL[secondary]} profile means you're also open to optimization — which is why we pair Chase checking (branch access, best app) with Capital One savings (4.25% APY, not Chase's 0.01%).`
 
     case 'rewards_builder':
-      return `With ${income}, strong credit, and the discipline to pay in full, you're positioned to extract real value from your daily spending. ${ef} means you have the stability to run premium cards without financial risk — the only variable that matters. Your ${secondary.replace(/_/g, ' ')} tendencies confirm you're optimizing across multiple dimensions, not just rewards. The math only works if you never carry a balance — and this stack is designed for exactly that discipline.`
+      return `With ${income}, strong credit, and the discipline to pay in full, you're positioned to extract real value from your daily spending. ${ef} means you have the stability to run premium cards without financial risk — the only variable that matters. Your ${ARCHETYPE_LABEL[secondary]} tendencies confirm you're optimizing across multiple dimensions, not just rewards. The math only works if you never carry a balance — and this stack is designed for exactly that discipline.`
 
     case 'early_wealth_starter':
-      return `With ${income}, ${ef}, and a focus on ${priority}, you're at the inflection point where financial decisions begin to compound exponentially. A dollar deployed into a Roth IRA today is worth 4–5x more than the same dollar at 35, due to compound growth. Your ${secondary.replace(/_/g, ' ')} profile means you also care about efficiency and yield on your cash — which is why this stack maximizes yield at every layer while pointing excess capital toward tax-advantaged investing.`
+      return `With ${income}, ${ef}, and a focus on ${priority}, you're at the inflection point where financial decisions begin to compound exponentially. A dollar deployed into a Roth IRA today is worth 4–5x more than the same dollar at 35, due to compound growth. Your ${ARCHETYPE_LABEL[secondary]} profile means you also care about efficiency and yield on your cash — which is why this stack maximizes yield at every layer while pointing excess capital toward tax-advantaged investing.`
   }
 }
 
@@ -424,9 +450,9 @@ function getAlternateOption(archetype: ArchetypeId, answers: UserAnswers): Alter
 
     case 'digital_optimizer':
       return {
-        institution: 'ally',
-        product: 'Ally Checking + High-Yield Savings',
-        reason: 'If you prefer separating your checking and savings into two distinct accounts, Ally\'s combination is clean and earns 4.20% on savings. Slightly lower yield than SoFi but a time-tested, stable platform.',
+        institution: 'capital_one',
+        product: 'Capital One 360 Checking + Performance Savings',
+        reason: 'If you want a no-fee account with physical backup locations, Capital One 360 has ~500 branches and Café locations — earns 4.25% on savings with no minimum and no direct deposit requirement to unlock the rate. Slightly lower yield than SoFi but no strings attached.',
       }
 
     case 'traditional_hybrid':

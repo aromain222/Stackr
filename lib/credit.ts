@@ -116,55 +116,84 @@ export function getCreditRecommendation(
           'Apply, then immediately set up autopay for the full statement balance. Activate quarterly categories the day they go live. Keep this card under 15% utilization to maximize score growth alongside rewards.',
       }
 
-    case 'emerging_optimizer':
+    case 'emerging_optimizer': {
+      // Chase for hybrid/wealth archetypes (ecosystem matters); Discover for digital/rewards
+      // (higher approval tolerance, strong first-year Cashback Match).
+      // Bug fix: why/whyNot/focusNow were previously always Chase text even when product was Discover.
+      const useChase =
+        archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter'
       return {
-        institution: archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter' ? 'chase' : 'discover',
-        product:
-          archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter'
-            ? 'Chase Freedom Unlimited®'
-            : 'Discover it® Cash Back',
+        institution: useChase ? 'chase' : 'discover',
+        product: useChase ? 'Chase Freedom Unlimited®' : 'Discover it® Cash Back',
         headline: 'Unlock a real rewards card with your solid history',
-        why: `Multiple on-time payments and a growing credit score open the door to legitimate rewards cards. Chase Freedom Unlimited earns 1.5% on all purchases with no annual fee, and becomes significantly more valuable if you later add a Chase Sapphire card — your points convert from 1.5¢ to 2.25¢+ each for travel. With ${incomeCtx}, this is a card you'll want to hold for years.`,
-        whyNotAlternatives:
-          "Premium travel cards (Sapphire Reserve, Amex Gold) require 700+ scores and charge $250–$550 annual fees that don't make sense until spending justifies them. Cash-back-only cards like Citi Double Cash are fine but don't build toward a points ecosystem.",
-        focusNow:
-          "If you're in the Chase ecosystem, use Freedom Unlimited for everyday spend, Chase Freedom Flex for 5% categories, and a Chase Sapphire as your third card in 12–18 months. The trio creates a points earning engine.",
+        why: useChase
+          ? `Your payment history opens the door to real rewards. Chase Freedom Unlimited earns 1.5% on everything, 3% on dining, and 5% on Chase travel — no annual fee. More importantly, it anchors the Chase ecosystem: add a Sapphire card in 12–18 months and those points jump from 1¢ to 2.25¢+ each for travel. With ${incomeCtx}, this is a card worth holding for years.`
+          : `Your consistent payments qualify you for cards that actually earn. Discover it Cash Back earns 5% on rotating quarterly categories (gas, groceries, Amazon, restaurants) and 1% everywhere else — no annual fee. Discover also matches every dollar of cashback you earn in year one, making the first 12 months especially strong. With ${incomeCtx}, the Cashback Match is a meaningful head start.`,
+        whyNotAlternatives: useChase
+          ? `Premium travel cards (Sapphire Reserve, Amex Gold) charge $250–$550/year and require 700+ scores to justify the fees. Citi Double Cash earns 2% flat but doesn't build toward a transferable points currency. Chase Freedom Unlimited earns less on flat spending but scales significantly once you add a Sapphire.`
+          : `Chase Freedom Unlimited is the stronger long-term card but typically requires a 670+ score with clean history. Amex cards require more established credit. Discover's approval rate at your stage is meaningfully higher, and the first-year Cashback Match makes it competitive against higher-earning cards.`,
+        focusNow: useChase
+          ? `Apply, set up full-balance autopay immediately, and use this card for all everyday spending. Apply for Chase Freedom Flex (5% rotating categories, no annual fee) in 6 months — the two cards together earn more than either alone.`
+          : `Apply and set up full-balance autopay before your first statement closes. Log into Discover and manually activate each quarter's bonus categories — it's required every 90 days and easy to miss. Keep utilization under 15% to grow both rewards and your score.`,
       }
+    }
 
     case 'rewards_optimizer':
+      // Branch 1: ideal path — pays in full + rewards-focused archetype → premium card
       if (
         answers.debtSituation === 'pays_in_full' &&
         (archetype === 'rewards_builder' || archetype === 'early_wealth_starter')
       ) {
+        // Amex Gold for spend-heavy savers (4x dining/groceries offsets $250 fee quickly).
+        // Chase Sapphire for everyone else (transferable points, stronger ecosystem breadth).
+        const useAmex = answers.income === 'full_time_high' || answers.income === 'self_employed'
         return {
-          institution: answers.priority === 'start_investing' ? 'amex' : 'chase',
-          product:
-            answers.priority === 'start_investing'
-              ? 'American Express® Gold Card'
-              : 'Chase Sapphire Preferred®',
+          institution: useAmex ? 'amex' : 'chase',
+          product: useAmex ? 'American Express® Gold Card' : 'Chase Sapphire Preferred®',
           headline: 'Premium rewards for a premium credit profile',
-          why: `Your 700+ score and consistent full-payment history qualify you for the top tier. ${
-            answers.priority === 'start_investing'
-              ? 'Amex Gold earns 4x at restaurants and U.S. supermarkets — two of the highest-spend categories for most adults. With annual dining credits offsetting much of the $250 fee, the net cost is low relative to the rewards earned.'
-              : 'Chase Sapphire Preferred earns 3x on dining, 2x on travel, and transfers to 14 airline and hotel partners at 1:1 — meaning points can be worth 2–4¢ each through transfer partners versus 1¢ for cash back.'
-          } With ${incomeCtx}, the annual fee is justified by spend alone.`,
+          why: useAmex
+            ? `Your 700+ score and full-payment discipline qualify you for the cards most people can't access. Amex Gold earns 4x at restaurants and U.S. supermarkets — two of the highest-spend categories for high earners. The $250 annual fee is offset by $120 dining credits and $120 Uber Cash annually, bringing the net cost to ~$10/year for people who use both. With ${incomeCtx}, the category bonuses alone justify it.`
+            : `Your 700+ score and full-payment history open the premium tier. Chase Sapphire Preferred earns 3x on dining, 2x on travel, and transfers to 14 airline and hotel partners at 1:1 — points are worth 2–4¢ each through transfer partners, versus 1¢ for cash back. The $95 annual fee pays for itself with a single travel redemption. With ${incomeCtx}, this is the strongest entry point into transferable rewards.`,
           whyNotAlternatives:
-            "Discover it and Capital One Quicksilver are fine starter cards but earn at flat rates that don't scale with higher spend. The opportunity cost of staying on a no-fee card at 1.5% versus a premium card at 3–4x in key categories grows every year.",
-          focusNow:
-            answers.priority === 'start_investing'
-              ? 'Apply, set up full-balance autopay, then immediately claim the $120 dining credit and $120 Uber Cash credits to offset the annual fee. Never carry a balance on a rewards card — interest erases all gains immediately.'
-              : 'Apply, enroll in Pay Yourself Back to redeem at 1.25¢/point for groceries and gas while building toward a travel redemption. Add Chase Freedom Unlimited as a companion for non-bonus spend.',
+            "Discover it and Capital One Quicksilver earn at flat rates that don't scale with higher spend. The opportunity cost grows every year: 1.5% flat versus 3–4x on key categories is a meaningful difference at $30k–$50k+ in annual spending. No-fee cards are the right starting point — premium cards are the logical upgrade once the discipline is established.",
+          focusNow: useAmex
+            ? `Apply, set up full-balance autopay, then immediately activate the $120 dining credit ($10/month at restaurants) and $120 Uber Cash to offset the fee. Never carry a balance — 28% APR would erase a full year of rewards in two months.`
+            : `Apply, enroll in Chase Pay Yourself Back to redeem at 1.25¢/point for groceries and gas while building toward a travel redemption. Add Chase Freedom Unlimited as a companion for non-bonus spend — together they maximize every purchase.`,
         }
       }
+
+      // Branch 2: carries a balance at 700+ → interest destroys rewards, warn clearly
+      if (answers.debtSituation === 'carries_balance') {
+        return {
+          institution: 'discover',
+          product: 'Discover it® Cash Back',
+          headline: 'Strong credit, but interest cancels every dollar of rewards — clear the balance first',
+          why: `Your 700+ score qualifies you for premium rewards cards, but carrying a balance at 20–28% APR means rewards are wiped out multiple times over. On a $2,000 balance at 24% APR, you pay ~$480 in interest annually — a $300 rewards yield means a net loss of $180. Discover it Cash Back earns real rewards with no annual fee, and no pressure to carry the card to a zero balance immediately.`,
+          whyNotAlternatives: `Amex Gold ($250/year) and Chase Sapphire Preferred ($95/year) only make financial sense when you consistently pay in full. Annual fees plus revolving interest creates a guaranteed negative return. Your credit score is already there — clearing the balance is the only remaining condition.`,
+          focusNow: `Set every card to autopay the full statement balance starting this billing cycle. Once you've cleared revolving debt and held three consecutive zero-balance statements, your profile qualifies for the premium stack. The score is ready — the habit is the last piece.`,
+        }
+      }
+
+      // Branch 3: traditional_hybrid at 700+ → Chase Freedom Flex (5% categories, organized user)
+      if (archetype === 'traditional_hybrid') {
+        return {
+          institution: 'chase',
+          product: 'Chase Freedom Flex®',
+          headline: '5% on rotating categories — the highest-earning no-fee card in the Chase lineup',
+          why: `Your 700+ score and payment history qualify you for Chase's strongest no-fee card. Freedom Flex earns 5% on quarterly rotating categories (typically groceries, gas, Amazon, dining), 3% on dining and drugstores year-round, and 1% everywhere else. For someone comfortable activating categories each quarter, the annual cashback outperforms most flat-rate cards. With ${incomeCtx}, this fits your systematic approach to money.`,
+          whyNotAlternatives: `Chase Freedom Unlimited earns more on flat spending but less during 5% quarters. If you're willing to spend 30 seconds activating categories four times a year, Freedom Flex earns meaningfully more annually. Amex Gold earns higher category rates but charges $250/year — the math only works at higher spending levels.`,
+          focusNow: `Apply, activate the current quarter's bonus categories immediately, and set a recurring calendar reminder for the first day of each quarter. Set up full-balance autopay before your first statement closes.`,
+        }
+      }
+
+      // Branch 4: fallback — strong credit but not optimally placed (digital_optimizer, foundation_builder)
       return {
         institution: 'chase',
         product: 'Chase Freedom Unlimited®',
-        headline: 'Your credit is strong — unlock a full rewards ecosystem',
-        why: `A 700+ score puts Chase Freedom Unlimited well within reach. It earns 1.5% on all purchases, 3% on dining, and 5% on travel booked through Chase — with no annual fee. More importantly, it becomes the foundation of the Chase trifecta if you add a Sapphire card later.`,
-        whyNotAlternatives:
-          "A secured card at your stage is unnecessary. Discover it is a good card but caps rewards at 5% category spending. Chase Freedom Unlimited provides uncapped 1.5% everywhere, making it a better daily driver.",
-        focusNow:
-          'Apply and immediately set up full-balance autopay. Use for all everyday spending and review your eligibility for Chase Sapphire Preferred in 6–12 months once you see your credit profile develop.',
+        headline: 'Strong credit opens the door — build toward a full rewards stack',
+        why: `A 700+ score puts Chase Freedom Unlimited well within reach. It earns 1.5% on all purchases, 3% on dining, and 5% on travel booked through Chase — no annual fee. More importantly, it anchors the Chase ecosystem: add a Sapphire card in 6–12 months and Freedom Unlimited points become transferable to airlines and hotels at 2.25¢+ each.`,
+        whyNotAlternatives: `Citi Double Cash earns 2% flat but doesn't build toward a transferable points currency. Amex cards charge annual fees that require high spend to justify. Chase Freedom Unlimited provides optionality — it upgrades in value when you add a Sapphire, without any cost today.`,
+        focusNow: `Apply, set up full-balance autopay immediately, and use for all spending. Begin tracking your Chase Ultimate Rewards balance — you're building toward a Chase Sapphire Preferred as your next card, which unlocks the full travel value of every point earned on Freedom Unlimited.`,
       }
 
     default:

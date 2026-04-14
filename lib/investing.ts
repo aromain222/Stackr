@@ -125,17 +125,24 @@ export function getInvestingRecommendation(
   const efCtx = EF_CONTEXT[answers.emergencyFund] ?? 'your current savings'
 
   switch (readiness) {
-    case 'not_ready':
+    case 'not_ready': {
+      const wantToInvest = answers.priority === 'start_investing'
       return {
         institution: 'ally',
         product: 'Ally High-Yield Savings Account',
-        headline: 'Build your safety net before entering the market',
-        why: `With ${efCtx} and ${incomeCtx}, investing right now creates more risk than return. If the market drops and you need cash, you sell at the worst time. The mathematically correct move is to direct every available dollar into a high-yield savings account until you have 3 months of expenses. Ally's 4.20% APY means your emergency fund earns real yield while you build it.`,
+        headline: wantToInvest
+          ? 'You want to invest — but first you need a cushion that lets you stay invested'
+          : 'Build your safety net before entering the market',
+        why: wantToInvest
+          ? `Investing is the right goal. But with ${efCtx} and ${incomeCtx}, you'd be one emergency away from having to sell at exactly the wrong time. The biggest threat to long-term returns isn't picking the wrong stock — it's being forced to liquidate during a downturn because you needed cash. Three months of expenses in high-yield savings is what lets you stay invested through volatility. Ally's 4.20% APY means your cushion earns real yield while you build it.`
+          : `With ${efCtx} and ${incomeCtx}, investing right now creates more risk than return. If the market drops and you need cash, you sell at the worst time. The mathematically correct move is to direct every available dollar into a high-yield savings account until you have 3 months of expenses. Ally's 4.20% APY means your emergency fund earns real yield while you build it.`,
         whyNotAlternatives:
           "Brokerage accounts, target-date funds, and even conservative ETFs have drawdown risk. If an emergency hits while you're invested, you're forced to sell at a loss. High-yield savings is the only vehicle that preserves capital and earns yield simultaneously.",
-        focusNow:
-          'Open an Ally Savings account, set up a weekly auto-transfer of any fixed amount — even $25 counts. Make it automatic so it happens without friction. Revisit investing once you cross 3 months of expenses.',
+        focusNow: wantToInvest
+          ? "Open an Ally Savings account and automate a fixed weekly transfer — even $25/week counts. Once you cross 3 months of expenses, open a Roth IRA at Fidelity immediately. The investing goal is still the destination — this is the required step before it."
+          : 'Open an Ally Savings account, set up a weekly auto-transfer of any fixed amount — even $25 counts. Make it automatic so it happens without friction. Revisit investing once you cross 3 months of expenses.',
       }
+    }
 
     case 'conservative':
       return {
@@ -152,7 +159,7 @@ export function getInvestingRecommendation(
     case 'moderate':
       return {
         institution: 'ally',
-        product: 'Fidelity or Ally Invest — Index Fund Portfolio',
+        product: 'Fidelity — Roth IRA (Total Market Index Funds)',
         headline: "You're ready to invest seriously — keep it simple with index funds",
         why: `With ${efCtx} and ${incomeCtx}, you have the foundation to take on real market exposure. Low-cost total market index funds (Fidelity FZROX or Vanguard VTSAX) give you ownership of the entire U.S. equity market for near-zero cost. Over 20+ years, they outperform 90%+ of actively managed funds after fees. With ${answers.retirement === '401k_with_match' ? 'employer match already captured, adding a Roth IRA' : 'a Roth IRA as your next account'}, you maximize tax-advantaged space.`,
         whyNotAlternatives:
@@ -165,7 +172,7 @@ export function getInvestingRecommendation(
 
     case 'growth':
       return {
-        institution: 'sofi',
+        institution: 'ally',
         product: 'Fidelity — Taxable Brokerage + Maxed Roth IRA',
         headline: 'Maximize tax-advantaged accounts, then build taxable wealth',
         why: `With ${efCtx}, ${incomeCtx}, and no revolving debt, you're in position to deploy capital at scale. The priority order: (1) capture full 401k employer match, (2) max Roth IRA at $7,000/year, (3) if cash remains, open a taxable brokerage for additional index fund investment. Fidelity's FZROX has a 0.00% expense ratio — the market, for free.`,

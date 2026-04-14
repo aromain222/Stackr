@@ -46,13 +46,32 @@ export function generateRetirementGuidance(answers: UserAnswers): RetirementGuid
           "You have a solid enough foundation to start. Even $100/month in a Roth IRA at 25 becomes ~$350,000 by 65 at average market returns. At 35, that same $100/month becomes ~$170,000. The cost of deferring isn't abstract — it's real compounding years. Open a Roth IRA at Fidelity this month and start small.",
       }
 
-    case 'dont_know':
+    case 'dont_know': {
+      const isHighEarner = income === 'full_time_high' || income === 'self_employed' || income === 'full_time_mid'
+      const isStudent = income === 'student' || income === 'part_time'
+      if (isHighEarner) {
+        const incomeLabel = income === 'full_time_high' ? 'a high income' : income === 'self_employed' ? 'self-employment income' : 'a solid income'
+        return {
+          status: 'Unchecked',
+          action: "Check your HR portal now — uncaptured employer match is free money forfeited every paycheck",
+          explanation: `With ${incomeLabel}, retirement optimization is time-sensitive and the stakes are real. Check your HR benefits portal or paycheck stub for 401k line items. An uncaptured employer match is a 50–100% guaranteed return you're leaving on the table every pay period. If you're self-employed, a SEP-IRA allows contributions up to 25% of net earnings — far above the standard $7,000 Roth IRA limit.`,
+        }
+      }
+      if (isStudent) {
+        return {
+          status: 'Unchecked',
+          action: 'Open a Roth IRA at Fidelity — even $25/month now compounds dramatically',
+          explanation:
+            "At your stage, the most valuable retirement asset isn't money — it's time. A Roth IRA at Fidelity has no minimum to open. Start with $25/month in a target-date fund. Contributions are after-tax, so every dollar grows completely tax-free. Even $100/month starting at 22 becomes ~$400,000 by 65 at average market returns — the same $100/month starting at 32 becomes roughly $180,000.",
+        }
+      }
       return {
         status: 'Unchecked',
-        action: 'Check your HR benefits portal — you may already have a 401k you\'re not using',
+        action: "Check your HR benefits portal — you may already have a 401k you're not using",
         explanation:
           "Many employers auto-enroll new hires in a 401k at a default contribution rate (often 3%). Check your HR portal or paycheck stub for retirement line items. If you have an employer match you're not capturing, that's free money being left on the table every pay period. If there's no 401k option, open a Roth IRA at Fidelity independently — you don't need an employer to start.",
       }
+    }
 
     default:
       return {
