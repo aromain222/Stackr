@@ -22,7 +22,7 @@ export const QUESTIONS: Question[] = [
     step: 1,
     key: 'income',
     title: "What's your income situation?",
-    subtitle: 'This shapes which products are actually accessible to you.',
+    subtitle: 'Products and approval odds vary significantly by income level.',
     options: [
       {
         id: 'student',
@@ -39,7 +39,7 @@ export const QUESTIONS: Question[] = [
       {
         id: 'full_time_low',
         label: 'Full-time under $50k',
-        description: 'Steady job, still building financial footing',
+        description: 'Steady income, still establishing the basics',
         icon: 'Briefcase',
       },
       {
@@ -51,7 +51,7 @@ export const QUESTIONS: Question[] = [
       {
         id: 'full_time_high',
         label: 'Full-time $100k+',
-        description: 'High earner focused on efficiency and growth',
+        description: 'High earner, optimizing for returns',
         icon: 'Award',
       },
       {
@@ -67,7 +67,7 @@ export const QUESTIONS: Question[] = [
     step: 2,
     key: 'creditSituation',
     title: "Where does your credit stand?",
-    subtitle: "Be honest — this determines which cards you can realistically get.",
+    subtitle: "Your current standing determines which cards are within reach.",
     options: [
       {
         id: 'no_credit',
@@ -78,7 +78,7 @@ export const QUESTIONS: Question[] = [
       {
         id: 'one_two_cards',
         label: '1–2 cards, paying on time',
-        description: 'Building history, always pay at least the minimum',
+        description: 'Building history, always paying on time',
         icon: 'CreditCard',
       },
       {
@@ -106,7 +106,7 @@ export const QUESTIONS: Question[] = [
     step: 3,
     key: 'emergencyFund',
     title: 'How much do you have saved?',
-    subtitle: "Emergency fund first — everything else is built on top of it.",
+    subtitle: "Your savings level changes what makes sense to do next.",
     options: [
       {
         id: 'none',
@@ -139,7 +139,7 @@ export const QUESTIONS: Question[] = [
     step: 4,
     key: 'bankingPreference',
     title: 'How do you prefer to bank?',
-    subtitle: 'No right answer — your preference determines the best fit.',
+    subtitle: 'Your preference narrows the field significantly.',
     options: [
       {
         id: 'digital',
@@ -172,7 +172,7 @@ export const QUESTIONS: Question[] = [
     step: 5,
     key: 'priority',
     title: "What's your #1 financial focus?",
-    subtitle: 'Pick the one that matters most right now.',
+    subtitle: 'One priority shapes the whole recommendation.',
     options: [
       {
         id: 'build_credit',
@@ -211,7 +211,7 @@ export const QUESTIONS: Question[] = [
     step: 6,
     key: 'debtSituation',
     title: 'Do you carry a credit card balance?',
-    subtitle: "This affects which cards make sense and which ones could hurt you.",
+    subtitle: "Carrying a balance changes the math on every rewards card.",
     options: [
       {
         id: 'carries_balance',
@@ -244,12 +244,12 @@ export const QUESTIONS: Question[] = [
     step: 7,
     key: 'retirement',
     title: 'What about retirement?',
-    subtitle: 'Early action here is the highest-leverage financial move available.',
+    subtitle: 'Timing compounds — small early decisions matter more than most people expect.',
     options: [
       {
         id: '401k_with_match',
         label: "I have a 401k with employer match",
-        description: "Contributing and capturing free match dollars",
+        description: "Contributing and capturing the employer match",
         icon: 'Award',
       },
       {
@@ -283,7 +283,7 @@ export const QUESTIONS: Question[] = [
     step: 8,
     key: 'checkingPreference',
     title: "What matters most in a checking account?",
-    subtitle: "This is where your money lives day-to-day — it should work for you.",
+    subtitle: "Your answer determines which type of account fits best.",
     options: [
       {
         id: 'no_fees',
@@ -306,7 +306,7 @@ export const QUESTIONS: Question[] = [
       {
         id: 'mobile_app',
         label: 'Best mobile experience',
-        description: 'Top-tier app with smart features and design',
+        description: 'Clean, well-built banking app above all else',
         icon: 'Smartphone',
       },
       {

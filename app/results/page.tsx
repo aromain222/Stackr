@@ -68,7 +68,7 @@ function GeneratingScreen() {
         <div className="text-center mb-10">
           <Layers className="w-6 h-6 text-[#5B8BF5] mx-auto mb-4" />
           <p className="text-sm text-[#7C8599] uppercase tracking-widest font-medium">
-            Building your stack
+            Analyzing your profile
           </p>
         </div>
 
@@ -102,7 +102,7 @@ function GeneratingScreen() {
                       className="flex items-center gap-2"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#00D4A0] flex-shrink-0" />
-                      <span className="text-sm text-[#7C8599]">Matched</span>
+                      <span className="text-sm text-[#7C8599]">Found</span>
                     </motion.div>
                   ) : (
                     <div className="flex items-center gap-1.5">
@@ -218,14 +218,14 @@ function RecommendationCard({
         <div className="space-y-4">
           <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
             <p className="text-xs text-[#5B8BF5] uppercase tracking-widest font-medium mb-2">
-              Why this fits you
+              Why this one
             </p>
             <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.why}</p>
           </div>
 
           <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
             <p className="text-xs text-[#7C8599] uppercase tracking-widest font-medium mb-2">
-              Why not alternatives
+              Why not the others
             </p>
             <p className="text-sm text-[#7C8599] leading-relaxed">{rec.whyNotAlternatives}</p>
           </div>
@@ -299,7 +299,7 @@ export default function ResultsPage() {
         <Link href="/onboarding">
           <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
             <RefreshCw className="w-3 h-3" />
-            Retake
+            Start over
           </Button>
         </Link>
       </nav>
@@ -320,7 +320,7 @@ export default function ResultsPage() {
           </h1>
           <p className="text-lg text-[#7C8599] mb-1">{archetype.tagline}</p>
           <p className="text-sm text-[#4A5166] mb-6">
-            Secondary profile: <span className="text-[#7C8599]">{secondaryArchetype.name}</span>
+            Secondary: <span className="text-[#7C8599]">{secondaryArchetype.name}</span>
           </p>
           <p className="text-[#D0D5E8] leading-relaxed text-sm border-l-2 border-[#1C2030] pl-4">
             {stack.explanation}
@@ -366,7 +366,7 @@ export default function ResultsPage() {
           transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-5">
-            Why each one fits you
+            The full breakdown
           </p>
           <div className="space-y-4">
             <RecommendationCard category="checking" rec={stack.checkingRecommendation} index={0} />
@@ -422,7 +422,7 @@ export default function ResultsPage() {
           transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-5">
-            Action Plan
+            Where to start
           </p>
           <div className="space-y-3">
             {stack.nextMoves.map((move, i) => (
@@ -471,7 +471,7 @@ export default function ResultsPage() {
           transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
-            If your situation changes
+            Worth knowing
           </p>
           <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-6">
             <div className="flex items-start gap-3">
@@ -495,12 +495,12 @@ export default function ResultsPage() {
           className="text-center pt-4 pb-8"
         >
           <p className="text-sm text-[#4A5166] mb-4">
-            Your stack is locked in. Now take the first step.
+            Built for where you are right now. Start with step one.
           </p>
           <Link href="/onboarding">
             <Button variant="outline" size="md" className="gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" />
-              Rebuild Stack
+              Start over
             </Button>
           </Link>
         </motion.div>

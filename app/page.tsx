@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 const STACK_PREVIEW = [
   {
     label: 'Cash',
-    description: 'Checking account',
+    description: 'Fee-free checking',
     color: '#5B8BF5',
     example: 'Capital One · SoFi · Chase',
   },
@@ -20,7 +20,7 @@ const STACK_PREVIEW = [
   },
   {
     label: 'Credit',
-    description: 'Cards matched to your stage',
+    description: 'Card matched to your profile',
     color: '#F5A623',
     example: 'Discover · Chase · Amex',
   },
@@ -68,7 +68,7 @@ export default function WelcomePage() {
           <motion.div variants={fadeUp} className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#1C2030] bg-[#0E1018] px-4 py-1.5 text-xs text-[#7C8599] uppercase tracking-widest font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D4A0] animate-pulse" />
-              Your financial stack, personalized
+              Checking · Savings · Credit · Investing
             </span>
           </motion.div>
 
@@ -86,21 +86,21 @@ export default function WelcomePage() {
             variants={fadeUp}
             className="text-lg text-[#7C8599] leading-relaxed mb-10 max-w-lg mx-auto text-balance"
           >
-            Answer 8 questions. Get a complete recommendation — checking, savings, credit, and investing — with a clear explanation of why each one fits you.
+            Answer 8 questions. Get matched to the right accounts across checking, savings, credit, and investing — each with a specific explanation of why it fits your situation.
           </motion.p>
 
           {/* CTA */}
           <motion.div variants={fadeUp} className="mb-6">
             <Link href="/onboarding">
               <Button size="xl" className="group">
-                Find My Stack
+                Build My Stack
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Button>
             </Link>
           </motion.div>
 
           <motion.p variants={fadeUp} className="text-xs text-[#4A5166]">
-            Takes about 2 minutes · No login required · No financial advice
+            2 minutes · No account required · Completely free
           </motion.p>
         </motion.div>
 
@@ -115,7 +115,7 @@ export default function WelcomePage() {
             variants={fadeUp}
             className="text-xs text-[#4A5166] uppercase tracking-widest font-medium text-center mb-5"
           >
-            Your stack will include
+            What's included
           </motion.p>
 
           <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function WelcomePage() {
             variants={fadeUp}
             className="text-center text-xs text-[#4A5166] mt-6"
           >
-            Each recommendation explains why it fits you — and why alternatives don't.
+            Every pick includes a specific explanation — and a clear reason why the alternatives didn't make the cut.
           </motion.p>
         </motion.div>
       </div>
