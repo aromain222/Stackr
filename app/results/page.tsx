@@ -56,6 +56,35 @@ const STACK_LAYERS = [
   { key: 'investing', label: 'Grow', color: '#C084FC' },
 ]
 
+// ─── Error screen ──────────────────────────────────────────────────────────────
+
+function ErrorScreen() {
+  const router = useRouter()
+  return (
+    <div className="min-h-screen bg-[#080A0F] flex flex-col items-center justify-center px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-sm text-center"
+      >
+        <div className="w-10 h-10 rounded-full border border-[#F56060]/30 bg-[#F56060]/10 flex items-center justify-center mx-auto mb-6">
+          <span className="text-[#F56060] font-bold text-base leading-none">!</span>
+        </div>
+        <h2 className="text-xl font-bold text-[#F0F2F8] mb-3">Couldn't build your stack</h2>
+        <p className="text-sm text-[#7C8599] leading-relaxed mb-8">
+          Your saved answers look incomplete or couldn't be read. Retaking the quiz takes about 2 minutes.
+        </p>
+        <Button onClick={() => router.push('/onboarding')} className="w-full justify-center">
+          Retake the quiz
+        </Button>
+      </motion.div>
+    </div>
+  )
+}
+
+// ─── Stack generation animation ────────────────────────────────────────────────
+
 function GeneratingScreen() {
   const [resolvedCount, setResolvedCount] = useState(0)
 
@@ -334,6 +363,7 @@ export default function ResultsPage() {
   const router = useRouter()
   const [stack, setStack] = useState<StackOutput | null>(null)
   const [generating, setGenerating] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     const answers = loadAnswers()
@@ -342,7 +372,15 @@ export default function ResultsPage() {
       return
     }
 
-    const result = generateStack(answers)
+    let result: StackOutput
+    try {
+      result = generateStack(answers)
+    } catch {
+      setError(true)
+      setGenerating(false)
+      return
+    }
+
     setStack(result)
 
     // Persist lightweight meta for the landing page return-user experience
@@ -356,6 +394,10 @@ export default function ResultsPage() {
     const timer = setTimeout(() => setGenerating(false), 2200)
     return () => clearTimeout(timer)
   }, [router])
+
+  if (error) {
+    return <ErrorScreen />
+  }
 
   if (generating || !stack) {
     return <GeneratingScreen />

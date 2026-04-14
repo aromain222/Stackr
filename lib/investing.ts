@@ -158,7 +158,7 @@ export function getInvestingRecommendation(
 
     case 'moderate':
       return {
-        institution: 'ally',
+        institution: 'fidelity',
         product: 'Fidelity — Roth IRA (Total Market Index Funds)',
         headline: "You're ready to invest seriously — keep it simple with index funds",
         why: `With ${efCtx} and ${incomeCtx}, you have the foundation to take on real market exposure. Low-cost total market index funds (Fidelity FZROX or Vanguard VTSAX) give you ownership of the entire U.S. equity market for near-zero cost. Over 20+ years, they outperform 90%+ of actively managed funds after fees. With ${answers.retirement === '401k_with_match' ? 'employer match already captured, adding a Roth IRA' : 'a Roth IRA as your next account'}, you maximize tax-advantaged space.`,
@@ -172,7 +172,7 @@ export function getInvestingRecommendation(
 
     case 'growth':
       return {
-        institution: 'ally',
+        institution: 'fidelity',
         product: 'Fidelity — Taxable Brokerage + Maxed Roth IRA',
         headline: 'Maximize tax-advantaged accounts, then build taxable wealth',
         why: `With ${efCtx}, ${incomeCtx}, and no revolving debt, you're in position to deploy capital at scale. The priority order: (1) capture full 401k employer match, (2) max Roth IRA at $7,000/year, (3) if cash remains, open a taxable brokerage for additional index fund investment. Fidelity's FZROX has a 0.00% expense ratio — the market, for free.`,

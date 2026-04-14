@@ -108,10 +108,14 @@ export function calculateArchetypeScores(answers: UserAnswers): ArchetypeScores 
 
 // ─── Archetype ranking ──────────────────────────────────────────────────────────
 
-/** Returns archetypes sorted by score descending */
+/** Returns archetypes sorted by score descending.
+ *  Ties break by canonical ARCHETYPE_IDS order for deterministic results. */
 export function rankArchetypes(scores: ArchetypeScores): ArchetypeId[] {
   return (Object.entries(scores) as [ArchetypeId, number][])
-    .sort(([, a], [, b]) => b - a)
+    .sort(([idA, a], [idB, b]) => {
+      if (b !== a) return b - a
+      return ARCHETYPE_IDS.indexOf(idA) - ARCHETYPE_IDS.indexOf(idB)
+    })
     .map(([id]) => id)
 }
 

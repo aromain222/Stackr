@@ -23,13 +23,43 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined'
 }
 
+// ─── Answer validation ─────────────────────────────────────────────────────────
+// Guards against corrupted, partial, or schema-mismatched localStorage data.
+// All 8 keys must be present with a recognised value — anything else is discarded.
+
+const VALID_VALUES = {
+  income: ['student', 'part_time', 'full_time_low', 'full_time_mid', 'full_time_high', 'self_employed'],
+  creditSituation: ['no_credit', 'one_two_cards', 'multiple_late', 'multiple_on_time', 'score_700_plus'],
+  emergencyFund: ['none', 'under_1mo', 'one_3mo', 'over_3mo'],
+  bankingPreference: ['digital', 'hybrid', 'in_person', 'rates_first'],
+  priority: ['build_credit', 'save_more', 'start_investing', 'manage_debt', 'get_organized'],
+  debtSituation: ['carries_balance', 'occasionally', 'pays_in_full', 'no_card'],
+  retirement: ['401k_with_match', '401k_no_match', 'want_to_start', 'not_priority', 'dont_know'],
+  checkingPreference: ['no_fees', 'high_yield', 'rewards', 'mobile_app', 'branch_access'],
+} as const
+
+function isValidAnswers(data: unknown): data is UserAnswers {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false
+  const d = data as Record<string, unknown>
+  return (Object.keys(VALID_VALUES) as (keyof typeof VALID_VALUES)[]).every(
+    (key) => (VALID_VALUES[key] as readonly string[]).includes(d[key] as string)
+  )
+}
+
 // ─── Answers ───────────────────────────────────────────────────────────────────
 
 export function loadAnswers(): UserAnswers | null {
   if (!isBrowser()) return null
   try {
     const raw = localStorage.getItem(KEYS.answers)
-    return raw ? (JSON.parse(raw) as UserAnswers) : null
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!isValidAnswers(parsed)) {
+      // Discard corrupt or schema-mismatched data rather than passing it downstream
+      localStorage.removeItem(KEYS.answers)
+      return null
+    }
+    return parsed
   } catch {
     return null
   }

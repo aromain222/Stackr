@@ -93,6 +93,7 @@ export type InstitutionId =
   | 'chase'
   | 'ally'
   | 'discover'
+  | 'fidelity'
 
 // ─── Output Types ──────────────────────────────────────────────────────────────
 

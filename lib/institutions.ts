@@ -51,4 +51,11 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     color: '#FF6600',
     tagline: 'Cash back with no annual fee',
   },
+  fidelity: {
+    id: 'fidelity',
+    name: 'Fidelity',
+    abbreviation: 'FDLY',
+    color: '#006638',
+    tagline: 'Zero-cost index fund investing',
+  },
 }

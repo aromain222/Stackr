@@ -690,9 +690,13 @@ function generateSupportContent(
   } else if (answers.retirement === 'want_to_start') {
     retirementFitNow =
       'Fidelity\'s Roth IRA has no minimum and no fees. A target-date fund handles all allocation automatically — open it, fund it, and leave it alone.'
-  } else {
+  } else if (answers.retirement === 'dont_know') {
     retirementFitNow =
-      'Every year without a Roth IRA contribution is a year of tax-free compounding you can\'t recover. The account takes 10 minutes to open and requires no minimum deposit at Fidelity.'
+      'Checking your HR portal takes 10 minutes and could reveal an uncaptured employer match — a guaranteed 50–100% return you may be leaving on the table every paycheck.'
+  } else {
+    // not_priority
+    retirementFitNow =
+      'Every year without a Roth IRA contribution is a year of tax-free compounding you can\'t recover. The account takes 10 minutes to open at Fidelity with no minimum deposit required.'
   }
 
   const retirement: SupportBlock = {
