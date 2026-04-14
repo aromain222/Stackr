@@ -14,27 +14,27 @@ import type { SavedMeta } from '@/lib/storage'
 const STACK_PREVIEW = [
   {
     label: 'Cash',
-    description: 'Fee-free checking',
+    description: 'No-fee checking account',
     color: '#5B8BF5',
     example: 'Capital One · SoFi · Chase',
   },
   {
     label: 'Save',
-    description: 'High-yield savings',
+    description: 'High-yield savings (4.2–4.6% APY)',
     color: '#00D4A0',
     example: 'Ally · SoFi · Amex',
   },
   {
     label: 'Credit',
-    description: 'Card matched to your profile',
+    description: 'Card for your exact credit stage',
     color: '#F5A623',
     example: 'Discover · Chase · Amex',
   },
   {
     label: 'Grow',
-    description: 'Investing & retirement',
+    description: 'Investing matched to your readiness',
     color: '#C084FC',
-    example: 'Fidelity FZROX · Roth IRA',
+    example: 'Fidelity · Roth IRA',
   },
 ]
 
@@ -109,7 +109,7 @@ export default function WelcomePage() {
             variants={fadeUp}
             className="text-lg text-[#7C8599] leading-relaxed mb-10 max-w-lg mx-auto text-balance"
           >
-            Answer 8 questions. Get matched to the right accounts across checking, savings, credit, and investing — each with a specific explanation of why it fits your situation.
+            Answer 8 questions. Get your exact checking, savings, credit, and investing accounts — each with a specific explanation of why it fits, and why the alternatives didn't.
           </motion.p>
 
           {/* CTA — branches on return user state */}
@@ -217,7 +217,7 @@ export default function WelcomePage() {
             variants={fadeUp}
             className="text-center text-xs text-[#4A5166] mt-6"
           >
-            Every pick includes a specific explanation — and a clear reason why the alternatives didn't make the cut.
+            Every recommendation includes a side-by-side comparison showing exactly why the alternatives didn't fit.
           </motion.p>
         </motion.div>
       </div>

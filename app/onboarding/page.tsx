@@ -52,7 +52,7 @@ export default function OnboardingPage() {
 
   const question = QUESTIONS[step]
   const selectedId = answers[question.key] as string | undefined
-  const progress = ((step) / QUESTIONS.length) * 100
+  const progress = ((step + 1) / QUESTIONS.length) * 100
 
   const selectOption = useCallback(
     (optionId: string) => {

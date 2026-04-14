@@ -22,7 +22,7 @@ export const QUESTIONS: Question[] = [
     step: 1,
     key: 'income',
     title: "What's your income situation?",
-    subtitle: 'Products and approval odds vary significantly by income level.',
+    subtitle: 'Your income determines which accounts and cards are realistically within reach.',
     options: [
       {
         id: 'student',
@@ -78,7 +78,7 @@ export const QUESTIONS: Question[] = [
       {
         id: 'one_two_cards',
         label: '1–2 cards, paying on time',
-        description: 'Building history, always paying on time',
+        description: 'Building a track record, no missed payments',
         icon: 'CreditCard',
       },
       {
@@ -106,7 +106,7 @@ export const QUESTIONS: Question[] = [
     step: 3,
     key: 'emergencyFund',
     title: 'How much do you have saved?',
-    subtitle: "Your savings level changes what makes sense to do next.",
+    subtitle: "This single number changes the order of operations for your entire stack.",
     options: [
       {
         id: 'none',
@@ -139,7 +139,7 @@ export const QUESTIONS: Question[] = [
     step: 4,
     key: 'bankingPreference',
     title: 'How do you prefer to bank?',
-    subtitle: 'Your preference narrows the field significantly.',
+    subtitle: 'Different banks are built for different people. This is the sharpest filter.',
     options: [
       {
         id: 'digital',
@@ -283,7 +283,7 @@ export const QUESTIONS: Question[] = [
     step: 8,
     key: 'checkingPreference',
     title: "What matters most in a checking account?",
-    subtitle: "Your answer determines which type of account fits best.",
+    subtitle: "Different banks optimize for entirely different things. This determines the priority.",
     options: [
       {
         id: 'no_fees',

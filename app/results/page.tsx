@@ -142,7 +142,7 @@ function GeneratingScreen() {
                       className="flex items-center gap-2"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#00D4A0] flex-shrink-0" />
-                      <span className="text-sm text-[#7C8599]">Found</span>
+                      <span className="text-sm text-[#7C8599]">Matched</span>
                     </motion.div>
                   ) : (
                     <div className="flex items-center gap-1.5">
@@ -505,7 +505,6 @@ export default function ResultsPage() {
   }
 
   const archetype = ARCHETYPES[stack.primaryArchetype]
-  const secondaryArchetype = ARCHETYPES[stack.secondaryArchetype]
   const creditStage = CREDIT_STAGES[stack.creditStage]
   const investingReadiness = INVESTING_READINESS[stack.investingReadiness]
   const retirementColor = getRetirementStatusColor(stack.retirementGuidance.status)
@@ -537,10 +536,17 @@ export default function ResultsPage() {
           <h1 className="text-4xl font-bold text-[#F0F2F8] tracking-tight leading-tight mb-2">
             {archetype.name}
           </h1>
-          <p className="text-lg text-[#7C8599] mb-1">{archetype.tagline}</p>
-          <p className="text-sm text-[#4A5166] mb-6">
-            Secondary: <span className="text-[#7C8599]">{secondaryArchetype.name}</span>
-          </p>
+          <p className="text-lg text-[#7C8599] mb-4">{archetype.tagline}</p>
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {archetype.traits.map(trait => (
+              <span
+                key={trait}
+                className="text-xs text-[#7C8599] border border-[#1C2030] bg-[#0E1018] rounded-full px-2.5 py-1"
+              >
+                {trait}
+              </span>
+            ))}
+          </div>
           <p className="text-[#D0D5E8] leading-relaxed text-sm border-l-2 border-[#1C2030] pl-4">
             {stack.explanation}
           </p>
@@ -711,7 +717,7 @@ export default function ResultsPage() {
           transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="section-label mb-4">
-            Worth knowing
+            Also worth considering
           </p>
           <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-6">
             <div className="flex items-start gap-3">
@@ -735,7 +741,7 @@ export default function ResultsPage() {
           className="text-center pt-4 pb-8"
         >
           <p className="text-sm text-[#4A5166] mb-4">
-            Built for where you are right now. Start with step one.
+            Built for exactly where you are. Step one is the only one that matters right now.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/onboarding">
