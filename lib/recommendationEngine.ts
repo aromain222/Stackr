@@ -8,9 +8,11 @@ import type {
   PlanningLayer,
   SupportBlock,
   SupportContent,
+  ComparisonRow,
   ArchetypeId,
   CreditStageId,
   InvestingReadinessId,
+  InstitutionId,
   IncomeLevel,
   BankingPreference,
   FinancialPriority,
@@ -442,43 +444,98 @@ function generateExplanation(
 }
 
 // ─── Alternate option ──────────────────────────────────────────────────────────
+// Alternate option selection is answer-aware: it considers the specific tradeoff
+// the user is most likely to face given their banking preference, income, emergency
+// fund status, and credit situation — not just their archetype.
 
 function getAlternateOption(archetype: ArchetypeId, answers: UserAnswers): AlternateOption {
   switch (archetype) {
-    case 'foundation_builder':
+    case 'foundation_builder': {
+      // If they want any in-person access, Chase is the relevant tradeoff
+      if (answers.bankingPreference === 'in_person' || answers.bankingPreference === 'hybrid') {
+        return {
+          institution: 'chase',
+          product: 'Chase Total Checking + separate HYSA',
+          reason: 'If branch access is a genuine requirement, Chase is the answer: 4,700+ locations and the best mobile app in traditional banking. The $12/month fee is waived with $500+ direct deposit. The critical caveat: Chase Savings pays just 0.01% APY — pair it immediately with a Capital One 360 Performance Savings account (4.25%, no conditions) for savings yield.',
+        }
+      }
+      // Default: SoFi as a single-platform upgrade
       return {
         institution: 'sofi',
         product: 'SoFi Checking & Savings',
-        reason: 'If you\'re comfortable going fully digital and can set up direct deposit, SoFi earns 4.60% on savings with zero fees — a meaningful upgrade from Ally + Capital One, at the cost of no branch access.',
+        reason: 'If you can route your paycheck through SoFi, you\'ll earn 4.60% on savings and 0.50% on checking with zero fees — all in one app instead of two. The only condition: the 4.60% savings rate requires direct deposit. Without it, you earn 1.20%, which is lower than Ally\'s no-condition rate.',
       }
+    }
 
-    case 'digital_optimizer':
+    case 'digital_optimizer': {
+      // If EF is thin, they may not be ready to set up DD at a new bank yet
+      const efThin = answers.emergencyFund === 'none' || answers.emergencyFund === 'under_1mo'
+      if (efThin) {
+        return {
+          institution: 'capital_one',
+          product: 'Capital One 360 Checking + Performance Savings',
+          reason: 'If you\'re not yet ready to switch direct deposit to a new bank, Capital One 360 earns 4.25% on savings with zero conditions — no direct deposit required, no minimum balance. The yield gap vs. SoFi with DD is $20/year on $5,000. You also get ~500 branch/café locations as a backup.',
+        }
+      }
+      return {
+        institution: 'ally',
+        product: 'Ally Online Savings + Interest Checking',
+        reason: 'If you prefer keeping checking and savings at a bank built specifically for savings (rather than SoFi\'s all-in-one model), Ally earns 4.20% on savings with no conditions and 0.25% on checking — no account to combine. The tradeoff: 4.20% vs. SoFi\'s 4.60% with DD is $20/year on $5,000, and no branches either way.',
+      }
+    }
+
+    case 'traditional_hybrid': {
+      // Lower income users face real fee risk with Chase
+      const feeRisk = answers.income === 'student' || answers.income === 'part_time' || answers.income === 'full_time_low'
+      if (feeRisk) {
+        return {
+          institution: 'capital_one',
+          product: 'Capital One 360 Checking + Performance Savings',
+          reason: 'If Chase\'s $12/month fee is a real concern at your current income, Capital One 360 is free with zero conditions — and has ~500 branch and Café locations for occasional in-person needs. You trade the Chase card ecosystem (Freedom, Sapphire, Ultimate Rewards) for zero fee risk and 4.25% APY on savings without any direct deposit requirement.',
+        }
+      }
       return {
         institution: 'capital_one',
         product: 'Capital One 360 Checking + Performance Savings',
-        reason: 'If you want a no-fee account with physical backup locations, Capital One 360 has ~500 branches and Café locations — earns 4.25% on savings with no minimum and no direct deposit requirement to unlock the rate. Slightly lower yield than SoFi but no strings attached.',
+        reason: 'If you want one banking relationship instead of two, Capital One 360 handles both checking (free, no conditions) and savings (4.25% APY) in one place. You give up Chase\'s branch density and the Freedom card ecosystem, but gain simplicity and zero fee risk even if your income changes.',
       }
+    }
 
-    case 'traditional_hybrid':
-      return {
-        institution: 'capital_one',
-        product: 'Capital One 360 Checking + Performance Savings',
-        reason: 'If Chase\'s $12/month fee is a concern and you\'re okay with fewer branches, Capital One 360 is completely free and earns 4.25% on savings. Fewer locations but a strong mobile app and no-fee structure.',
+    case 'rewards_builder': {
+      // Strong credit → Chase trifecta for travel points is a meaningful upgrade path
+      const strongCredit = answers.creditSituation === 'score_700_plus' || answers.creditSituation === 'multiple_on_time'
+      if (strongCredit) {
+        return {
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred + Freedom Unlimited + Freedom Flex',
+          reason: 'If transferable travel points appeal more than flat cash back, the Chase trifecta earns 1.5–5x on every category and converts points to airline and hotel partners at 1.5–4¢ each — compared to 1¢ for cash back. The system requires three cards and a $95 Sapphire annual fee, but at $30k+/year in spending the value gap grows substantially.',
+        }
       }
+      // Thinner credit → focus on building the credit path first
+      return {
+        institution: 'ally',
+        product: 'Ally Online Savings (for the emergency reserve)',
+        reason: 'While you build your credit card stack, the emergency fund needs to earn real yield. Ally earns 4.20% with no conditions and offers Savings Buckets for goal tracking — cleaner separation of the cash reserve from spending funds. Once the EF is funded, all surplus flows to the card rewards strategy.',
+      }
+    }
 
-    case 'rewards_builder':
-      return {
-        institution: 'chase',
-        product: 'Chase Sapphire Preferred + Freedom Flex',
-        reason: 'If you prefer travel points over cash back, the Chase trifecta (Sapphire + Freedom Unlimited + Freedom Flex) builds a transferable points currency worth 1.5–4¢/point through transfer partners — potentially higher value than flat cashback.',
+    case 'early_wealth_starter': {
+      // High earners with 401k match → Amex premium ecosystem is worth exploring
+      const highEarnerWithMatch = (answers.income === 'full_time_high' || answers.income === 'self_employed') && answers.retirement === '401k_with_match'
+      if (highEarnerWithMatch) {
+        return {
+          institution: 'amex',
+          product: 'Amex High-Yield Savings + Platinum Card',
+          reason: 'If you spend heavily on travel, the Amex ecosystem consolidates premium savings (4.35% HYSA, no conditions) with the Platinum Card\'s $1,500+ in travel credits — which offset the $695 annual fee for high spenders. Works best at $6,000+/year in travel and dining. The yield on savings is slightly lower than SoFi with DD (4.35% vs. 4.60%) but there are no conditions.',
+        }
       }
-
-    case 'early_wealth_starter':
+      // Default: Fidelity CMA as a single-platform option for investing-focused users
       return {
-        institution: 'amex',
-        product: 'Amex High-Yield Savings + Platinum Card',
-        reason: 'If you want to consolidate to one premium ecosystem, Amex HYSA at 4.35% APY + Amex Platinum\'s travel credits can offset the $695 fee for high spenders. Works best if you spend $6,000+/year on travel and dining.',
+        institution: 'fidelity',
+        product: 'Fidelity Cash Management Account',
+        reason: 'If fewer platforms and one login matters, Fidelity\'s CMA handles uninvested cash alongside your Roth IRA and brokerage — one institution, one app, one tax document. The tradeoff: cash yield is lower than SoFi\'s 4.60% (SoFi\'s rate is higher), but you eliminate the friction of transferring between a bank and an investment account.',
       }
+    }
   }
 }
 
@@ -710,6 +767,186 @@ function generateSupportContent(
   return { checking, savings, credit, investing, retirement }
 }
 
+// ─── Institution comparison builders ──────────────────────────────────────────
+//
+// Each builder returns 2–3 rows: the recommended institution (always first)
+// followed by the most relevant alternatives for that category and context.
+// Pools are defined as plain objects so tree-shaking can eliminate unused data.
+
+type CompRowBase = Omit<ComparisonRow, 'isRecommended'>
+
+const CHECKING_POOL: Partial<Record<InstitutionId, CompRowBase>> = {
+  sofi: {
+    institution: 'sofi',
+    product: 'Checking & Savings',
+    stat: '4.60% savings APY',
+    fee: '$0/month',
+    caveat: 'Requires direct deposit',
+  },
+  capital_one: {
+    institution: 'capital_one',
+    product: '360 Checking',
+    stat: '4.25% savings APY',
+    fee: '$0/month',
+    caveat: null,
+  },
+  chase: {
+    institution: 'chase',
+    product: 'Total Checking',
+    stat: '4,700+ branches',
+    fee: '$12/month',
+    caveat: 'Waived with $500/month direct deposit',
+  },
+  discover: {
+    institution: 'discover',
+    product: 'Cashback Debit',
+    stat: '1% debit cash back',
+    fee: '$0/month',
+    caveat: 'Up to $3,000/month in purchases',
+  },
+  ally: {
+    institution: 'ally',
+    product: 'Interest Checking',
+    stat: '4.20% savings APY',
+    fee: '$0/month',
+    caveat: null,
+  },
+}
+
+// Two best alternatives to show alongside each selected checking institution
+const CHECKING_ALTS: Partial<Record<InstitutionId, InstitutionId[]>> = {
+  sofi:        ['ally', 'capital_one'],
+  capital_one: ['sofi', 'chase'],
+  chase:       ['capital_one', 'sofi'],
+  discover:    ['sofi', 'capital_one'],
+}
+
+function buildCheckingComparisons(selected: InstitutionId): ComparisonRow[] {
+  const alts = CHECKING_ALTS[selected] ?? []
+  return [selected, ...alts]
+    .filter((id): id is InstitutionId => id in CHECKING_POOL)
+    .map(id => ({ ...CHECKING_POOL[id]!, isRecommended: id === selected }))
+}
+
+const SAVINGS_POOL: Partial<Record<InstitutionId, CompRowBase>> = {
+  sofi: {
+    institution: 'sofi',
+    product: 'Savings (integrated)',
+    stat: '4.60% APY',
+    fee: '$0/month',
+    caveat: 'Requires direct deposit',
+  },
+  capital_one: {
+    institution: 'capital_one',
+    product: '360 Performance Savings',
+    stat: '4.25% APY',
+    fee: '$0/month',
+    caveat: null,
+  },
+  amex: {
+    institution: 'amex',
+    product: 'High-Yield Savings',
+    stat: '4.35% APY',
+    fee: '$0/month',
+    caveat: null,
+  },
+  ally: {
+    institution: 'ally',
+    product: 'Online Savings',
+    stat: '4.20% APY',
+    fee: '$0/month',
+    caveat: null,
+  },
+}
+
+const SAVINGS_ALTS: Partial<Record<InstitutionId, InstitutionId[]>> = {
+  ally:        ['sofi', 'capital_one'],
+  sofi:        ['ally', 'capital_one'],
+  capital_one: ['ally', 'amex'],
+  amex:        ['ally', 'capital_one'],
+}
+
+function buildSavingsComparisons(selected: InstitutionId): ComparisonRow[] {
+  const alts = SAVINGS_ALTS[selected] ?? []
+  return [selected, ...alts]
+    .filter((id): id is InstitutionId => id in SAVINGS_POOL)
+    .map(id => ({ ...SAVINGS_POOL[id]!, isRecommended: id === selected }))
+}
+
+// Credit comparisons are keyed by stage since the relevant products differ
+// completely between stages. Each pool entry uses the canonical product for
+// that institution at that credit level.
+
+interface CreditCompBase {
+  institution: InstitutionId
+  product: string
+  stat: string
+  fee: string
+  caveat: string | null
+}
+
+const CREDIT_STAGE_POOL: Record<CreditStageId, CreditCompBase[]> = {
+  no_credit: [
+    { institution: 'discover',    product: 'Discover it® Secured',     stat: '2% cashback (restaurants/gas)', fee: '$0/year',  caveat: 'Refundable $200 deposit' },
+    { institution: 'capital_one', product: 'Platinum Secured',         stat: 'No rewards',                    fee: '$0/year',  caveat: 'Refundable deposit required' },
+  ],
+  early_builder: [
+    { institution: 'discover',    product: 'Discover it® Cash Back',   stat: '5% rotating + 1% base',         fee: '$0/year',  caveat: null },
+    { institution: 'capital_one', product: 'QuicksilverOne',           stat: '1.5% flat cash back',           fee: '$39/year', caveat: 'More lenient approval' },
+    { institution: 'chase',       product: 'Freedom Unlimited®',       stat: '1.5% base + 3% dining',         fee: '$0/year',  caveat: 'Typically requires 670+' },
+  ],
+  emerging_optimizer: [
+    { institution: 'chase',       product: 'Freedom Unlimited®',       stat: '1.5% base + 3% dining',         fee: '$0/year',  caveat: null },
+    { institution: 'discover',    product: 'Discover it® Cash Back',   stat: '5% rotating + 1% base',         fee: '$0/year',  caveat: null },
+    { institution: 'amex',        product: 'Blue Cash Everyday®',      stat: '3% groceries + 2% gas',         fee: '$0/year',  caveat: null },
+  ],
+  rewards_optimizer: [
+    { institution: 'chase',       product: 'Sapphire Preferred®',      stat: '3x dining + 2x travel',         fee: '$95/year', caveat: null },
+    { institution: 'amex',        product: 'Gold Card',                stat: '4x dining + groceries',         fee: '$250/year', caveat: '$240 in annual credits' },
+    { institution: 'discover',    product: 'Discover it® Cash Back',   stat: '5% rotating + 1% base',         fee: '$0/year',  caveat: null },
+  ],
+}
+
+// Product name overrides: when the actual recommendation product differs from the
+// pool's canonical entry for that institution (e.g. Freedom Flex vs Sapphire Preferred),
+// the recommended row is updated to reflect the real recommendation.
+const CREDIT_PRODUCT_OVERRIDES: Partial<Record<string, Pick<CreditCompBase, 'product' | 'stat' | 'fee' | 'caveat'>>> = {
+  'Chase Freedom Flex®':                 { product: 'Freedom Flex®',         stat: '5% rotating + 3% dining',  fee: '$0/year',  caveat: 'Quarterly activation required' },
+  'Chase Freedom Unlimited®':           { product: 'Freedom Unlimited®',    stat: '1.5% base + 3% dining',    fee: '$0/year',  caveat: null },
+  'Chase Sapphire Preferred®':          { product: 'Sapphire Preferred®',   stat: '3x dining + 2x travel',    fee: '$95/year', caveat: null },
+  'American Express® Gold Card':        { product: 'Gold Card',             stat: '4x dining + groceries',    fee: '$250/year', caveat: '$240 in annual credits' },
+  'Capital One QuicksilverOne Cash Rewards': { product: 'QuicksilverOne',   stat: '1.5% flat cash back',      fee: '$39/year', caveat: null },
+  'Capital One Platinum Secured Card':  { product: 'Platinum Secured',      stat: 'No rewards',               fee: '$0/year',  caveat: 'Refundable deposit' },
+  'Discover it® Secured Credit Card':   { product: 'Discover it® Secured',  stat: '2% cashback (restaurants/gas)', fee: '$0/year', caveat: 'Refundable deposit' },
+}
+
+function buildCreditComparisons(
+  creditStage: CreditStageId,
+  selectedInstitution: InstitutionId,
+  selectedProduct: string,
+): ComparisonRow[] {
+  const pool = CREDIT_STAGE_POOL[creditStage]
+  const productOverride = CREDIT_PRODUCT_OVERRIDES[selectedProduct]
+
+  const rows: ComparisonRow[] = pool.map(row => {
+    if (row.institution !== selectedInstitution) {
+      return { ...row, isRecommended: false }
+    }
+    // Apply product override so the row reflects the actual recommended product
+    const base = productOverride ? { ...row, ...productOverride } : row
+    return { ...base, isRecommended: true }
+  })
+
+  // If the selected institution isn't in the pool at all (edge case: a fallback
+  // recommendation not in the canonical pool), just return pool rows unmarked.
+  const hasMatch = rows.some(r => r.isRecommended)
+  if (!hasMatch) return rows.map(r => ({ ...r, isRecommended: false })).slice(0, 3)
+
+  const recommended = rows.filter(r => r.isRecommended)
+  const others = rows.filter(r => !r.isRecommended)
+  return [...recommended, ...others].slice(0, 3)
+}
+
 // ─── Main engine — pure function ──────────────────────────────────────────────
 
 export function generateStack(answers: UserAnswers): StackOutput {
@@ -730,6 +967,11 @@ export function generateStack(answers: UserAnswers): StackOutput {
   const alternateOption = getAlternateOption(primaryArchetype, answers)
   const planningLayer = generatePlanningLayer(primaryArchetype, creditStage, investingReadiness, answers)
   const support = generateSupportContent(primaryArchetype, creditStage, investingReadiness, answers)
+  const comparisons = {
+    checking: buildCheckingComparisons(checkingRecommendation.institution),
+    savings: buildSavingsComparisons(savingsRecommendation.institution),
+    credit: buildCreditComparisons(creditStage, creditRecommendation.institution, creditRecommendation.product),
+  }
 
   return {
     primaryArchetype,
@@ -747,5 +989,6 @@ export function generateStack(answers: UserAnswers): StackOutput {
     alternateOption,
     planningLayer,
     support,
+    comparisons,
   }
 }

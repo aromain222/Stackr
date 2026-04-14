@@ -16,7 +16,7 @@ import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
 import { track } from '@/lib/analytics'
-import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock } from '@/lib/types'
+import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow } from '@/lib/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -209,17 +209,81 @@ function StackMapRow({
   )
 }
 
+// ─── Institution comparison table ─────────────────────────────────────────────
+
+function ComparisonTable({ rows }: { rows: ComparisonRow[] }) {
+  if (!rows.length) return null
+  return (
+    <div>
+      <p className="card-label text-[#4A5166] mb-2.5">vs the field</p>
+      <div className="rounded-xl border border-[#1C2030] divide-y divide-[#1C2030] overflow-hidden">
+        {rows.map((row, i) => {
+          const inst = INSTITUTIONS[row.institution]
+          return (
+            <div key={`${row.institution}-${i}`}>
+              <div
+                className={[
+                  'flex items-center gap-3 px-4 py-2.5',
+                  row.isRecommended ? 'bg-[#141720]' : '',
+                ].join(' ')}
+              >
+                {/* Colored dot — institution color if recommended, dim if not */}
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: row.isRecommended ? inst.color : '#2D3247' }}
+                />
+                {/* Institution name */}
+                <span
+                  className="text-xs font-medium w-[5.5rem] flex-shrink-0"
+                  style={{ color: row.isRecommended ? inst.color : '#7C8599' }}
+                >
+                  {inst.name}
+                </span>
+                {/* Product name — hidden on small screens to avoid overflow */}
+                <span className="text-xs text-[#4A5166] flex-1 min-w-0 truncate hidden sm:block">
+                  {row.product}
+                </span>
+                {/* Primary stat */}
+                <span
+                  className={[
+                    'text-xs font-medium flex-shrink-0 ml-auto sm:ml-0',
+                    row.isRecommended ? 'text-[#F0F2F8]' : 'text-[#7C8599]',
+                  ].join(' ')}
+                >
+                  {row.stat}
+                </span>
+                {/* Fee */}
+                <span className="text-xs text-[#4A5166] flex-shrink-0 w-16 text-right">
+                  {row.fee}
+                </span>
+              </div>
+              {/* Caveat shown as an indented note beneath the row */}
+              {row.caveat && (
+                <p className="px-4 pb-2 text-xs text-[#4A5166] leading-relaxed pl-9">
+                  {row.caveat}
+                </p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ─── Recommendation card ───────────────────────────────────────────────────────
 
 function RecommendationCard({
   category,
   rec,
   support,
+  comparisons,
   index,
 }: {
   category: keyof typeof CATEGORY_META
   rec: Recommendation
   support: SupportBlock
+  comparisons: ComparisonRow[]
   index: number
 }) {
   const meta = CATEGORY_META[category]
@@ -264,6 +328,8 @@ function RecommendationCard({
             </p>
             <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.why}</p>
           </div>
+
+          {comparisons.length > 0 && <ComparisonTable rows={comparisons} />}
 
           <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
             <p className="card-label text-[#7C8599] mb-2">
@@ -525,10 +591,10 @@ export default function ResultsPage() {
             The full breakdown
           </p>
           <div className="space-y-4">
-            <RecommendationCard category="checking" rec={stack.checkingRecommendation} support={stack.support.checking} index={0} />
-            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} index={1} />
-            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} index={2} />
-            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} index={3} />
+            <RecommendationCard category="checking" rec={stack.checkingRecommendation} support={stack.support.checking} comparisons={stack.comparisons.checking} index={0} />
+            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} comparisons={stack.comparisons.savings} index={1} />
+            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} comparisons={stack.comparisons.credit} index={2} />
+            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} index={3} />
           </div>
         </motion.section>
 

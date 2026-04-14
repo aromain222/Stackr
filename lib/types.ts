@@ -129,6 +129,24 @@ export interface AlternateOption {
   reason: string
 }
 
+// ─── Institution comparison row ────────────────────────────────────────────────
+// Shown as a compact table inside each recommendation card so users can see
+// why the recommended option was chosen over specific alternatives.
+
+export interface ComparisonRow {
+  institution: InstitutionId
+  /** Short product name for display, e.g. "Checking & Savings" */
+  product: string
+  /** True for the recommended institution */
+  isRecommended: boolean
+  /** Primary differentiating metric: APY, rewards rate, branch count, etc. */
+  stat: string
+  /** Fee display string: "$0/month", "$95/year", etc. */
+  fee: string
+  /** Caveat or condition, shown as a subscript note — null if none */
+  caveat: string | null
+}
+
 export type PlanningCategory = 'banking' | 'savings' | 'credit' | 'investing' | 'retirement'
 
 export interface PlanningItem {
@@ -176,6 +194,12 @@ export interface StackOutput {
   alternateOption: AlternateOption
   planningLayer: PlanningLayer
   support: SupportContent
+  /** Side-by-side institution comparisons rendered inside each recommendation card */
+  comparisons: {
+    checking: ComparisonRow[]
+    savings: ComparisonRow[]
+    credit: ComparisonRow[]
+  }
 }
 
 // ─── Scoring Types ─────────────────────────────────────────────────────────────
