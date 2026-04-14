@@ -6,6 +6,8 @@ import type {
   AlternateOption,
   PlanningItem,
   PlanningLayer,
+  SupportBlock,
+  SupportContent,
   ArchetypeId,
   CreditStageId,
   InvestingReadinessId,
@@ -566,6 +568,144 @@ function generatePlanningLayer(
   }
 }
 
+// ─── Contextual support content ───────────────────────────────────────────────
+
+function generateSupportContent(
+  archetype: ArchetypeId,
+  creditStage: CreditStageId,
+  investingReadiness: InvestingReadinessId,
+  answers: UserAnswers
+): SupportContent {
+  // ── Checking ────────────────────────────────────────────────────────────────
+  const checkingFitNow: Record<ArchetypeId, string> = {
+    foundation_builder:
+      'Fee-free checking removes a fixed monthly drag — every dollar not lost to bank fees is available for savings and credit instead.',
+    digital_optimizer:
+      'SoFi earns 0.50% APY on the balance sitting between paychecks. Most checking accounts pay $0 on that float.',
+    traditional_hybrid:
+      'Chase is the only major bank that delivers full branch access and a top-rated mobile app — you don\'t have to choose between them.',
+    rewards_builder:
+      'Discover Cashback Debit earns 1% on everyday purchases that can\'t go on your credit card — debit spending should earn too.',
+    early_wealth_starter:
+      'SoFi\'s integrated account means idle cash earns 0.50% APY on checking and 4.60% on savings — not $0 like most banks pay on either.',
+  }
+
+  const checking: SupportBlock = {
+    categoryMatter:
+      'Your checking account is where every dollar lands first. Monthly fees and zero interest silently drain money you never notice losing.',
+    fitNow: checkingFitNow[archetype],
+    watchOut:
+      'Keeping a default bank account without reviewing its fee structure. Most traditional banks charge $12–$15/month — up to $180/year for nothing.',
+  }
+
+  // ── Savings ─────────────────────────────────────────────────────────────────
+  let savingsFitNow: string
+  if (answers.emergencyFund === 'none') {
+    savingsFitNow =
+      'Opening the account is step one. Even $1 establishes the account and the rate — consistent weekly contributions compound faster than any single lump sum.'
+  } else if (answers.emergencyFund === 'under_1mo') {
+    savingsFitNow =
+      'You have a start. Increasing the auto-transfer amount — even by $25/week — matters more than the starting balance at this stage.'
+  } else if (answers.emergencyFund === 'one_3mo') {
+    savingsFitNow =
+      'You\'re close. Define your target: monthly expenses × 3. Once you hit it, every dollar above that threshold should flow to investing, not more savings.'
+  } else {
+    savingsFitNow =
+      'Emergency fund is funded. The question now is whether your balance above the fund target is earning 4%+ APY or sitting idle at 0.01%.'
+  }
+
+  const savings: SupportBlock = {
+    categoryMatter:
+      'High-yield savings vs. a traditional account is the difference between 4%+ and 0.01% APY — that\'s $400/year on a $10,000 balance.',
+    fitNow: savingsFitNow,
+    watchOut:
+      'Keeping savings in a checking account or a bank paying 0.01% APY. On $5,000, that\'s $200/year in forgone yield compounding silently against you.',
+  }
+
+  // ── Credit ──────────────────────────────────────────────────────────────────
+  let creditFitNow: string
+  let creditWatchOut: string
+
+  if (creditStage === 'no_credit') {
+    creditFitNow =
+      'A secured card used correctly — one purchase monthly, paid in full — builds 12 months of positive payment history faster than any other method.'
+    creditWatchOut =
+      'Applying for multiple cards at once. Each hard inquiry harms a thin credit file. One secured card, used correctly, is the right first step.'
+  } else if (creditStage === 'early_builder') {
+    creditFitNow =
+      'Payment history is 35% of your score. One missed payment on a thin file can drop your score 50–80 points and takes 12 months to recover.'
+    creditWatchOut =
+      'Missing a payment — even by a day — on a thin file. Set every card to autopay the minimum as a permanent backstop, then pay the full balance manually.'
+  } else if (creditStage === 'emerging_optimizer') {
+    creditFitNow =
+      'Utilization below 10% matters more than credit limit. The balance reported is your statement balance — not what you actually owe at month-end.'
+    creditWatchOut =
+      'Carrying any balance on a rewards card. A 24% APR instantly erases every dollar of rewards earned — the math only works when paying in full every month.'
+  } else {
+    creditFitNow =
+      'At this stage, optimization is about matching the right rewards structure to your actual spending patterns — not chasing the most heavily marketed card.'
+    creditWatchOut =
+      'Carrying a balance on a premium rewards card. Rewards card APRs run 24–29% — one month of carrying a balance wipes out months of earned rewards.'
+  }
+
+  const credit: SupportBlock = {
+    categoryMatter:
+      'Your credit score determines the interest rate on every loan and mortgage you\'ll ever take out. A 760 vs. 680 score can mean $50,000+ in extra interest over a 30-year mortgage.',
+    fitNow: creditFitNow,
+    watchOut: creditWatchOut,
+  }
+
+  // ── Investing ────────────────────────────────────────────────────────────────
+  let investingFitNow: string
+  if (investingReadiness === 'not_ready') {
+    investingFitNow =
+      'Not ready to invest yet means building the preconditions first: emergency fund funded, high-interest debt cleared. The Roth IRA becomes step two once those are done.'
+  } else if (investingReadiness === 'conservative') {
+    investingFitNow =
+      'A target-date fund removes all allocation decisions — it automatically shifts from stocks to bonds as your retirement year approaches. No ongoing management required.'
+  } else if (investingReadiness === 'moderate') {
+    investingFitNow =
+      'A total market index fund (FZROX, VTI) gives you the entire U.S. stock market in one holding at near-zero cost. Diversification handled automatically.'
+  } else {
+    investingFitNow =
+      'Maximum equity exposure accepts higher short-term volatility in exchange for higher long-term expected returns. A multi-decade time horizon justifies it.'
+  }
+
+  const investing: SupportBlock = {
+    categoryMatter:
+      '$1,000 invested at 25 becomes ~$7,600 by 65 at 7% average returns. The same $1,000 at 35 becomes ~$3,800. Starting date matters more than contribution size.',
+    fitNow: investingFitNow,
+    watchOut:
+      'Waiting until the market looks right or you understand it better. Time in the market consistently outperforms timing the market — the delay itself is the biggest cost.',
+  }
+
+  // ── Retirement ───────────────────────────────────────────────────────────────
+  let retirementFitNow: string
+  if (answers.retirement === '401k_with_match') {
+    retirementFitNow =
+      'Employer match is a guaranteed 50–100% return on contribution before any market return. Uncaptured match is the most expensive financial mistake available at your income level.'
+  } else if (answers.retirement === '401k_no_match') {
+    retirementFitNow =
+      'Without a match, a Roth IRA becomes your primary tax-advantaged vehicle — 40 years of tax-free compounding consistently beats a taxable brokerage on equal contributions.'
+  } else if (answers.retirement === 'want_to_start') {
+    retirementFitNow =
+      'Fidelity\'s Roth IRA has no minimum and no fees. A target-date fund handles all allocation automatically — open it, fund it, and leave it alone.'
+  } else {
+    retirementFitNow =
+      'Every year without a Roth IRA contribution is a year of tax-free compounding you can\'t recover. The account takes 10 minutes to open and requires no minimum deposit at Fidelity.'
+  }
+
+  const retirement: SupportBlock = {
+    categoryMatter:
+      'Roth IRA contributions at 25 compound tax-free for 40 years. After-tax dollars in, tax-free growth out — no other account combines those two advantages for that long.',
+    fitNow: retirementFitNow,
+    watchOut:
+      'Treating retirement contributions as optional until income improves. Starting decade matters far more than contribution rate — every decade of delay roughly halves the final compounded value.',
+  }
+
+  return { checking, savings, credit, investing, retirement }
+}
+
 // ─── Main engine — pure function ──────────────────────────────────────────────
 
 export function generateStack(answers: UserAnswers): StackOutput {
@@ -585,6 +725,7 @@ export function generateStack(answers: UserAnswers): StackOutput {
   const explanation = generateExplanation(primaryArchetype, secondaryArchetype, answers)
   const alternateOption = getAlternateOption(primaryArchetype, answers)
   const planningLayer = generatePlanningLayer(primaryArchetype, creditStage, investingReadiness, answers)
+  const support = generateSupportContent(primaryArchetype, creditStage, investingReadiness, answers)
 
   return {
     primaryArchetype,
@@ -601,5 +742,6 @@ export function generateStack(answers: UserAnswers): StackOutput {
     explanation,
     alternateOption,
     planningLayer,
+    support,
   }
 }

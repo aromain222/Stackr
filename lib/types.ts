@@ -142,6 +142,23 @@ export interface PlanningLayer {
   laterOpportunities: PlanningItem[]
 }
 
+export interface SupportBlock {
+  /** Why this financial category matters at all */
+  categoryMatter: string
+  /** Why this specific recommendation fits the user's current situation */
+  fitNow: string
+  /** The single most common mistake to avoid in this category */
+  watchOut: string
+}
+
+export interface SupportContent {
+  checking: SupportBlock
+  savings: SupportBlock
+  credit: SupportBlock
+  investing: SupportBlock
+  retirement: SupportBlock
+}
+
 export interface StackOutput {
   primaryArchetype: ArchetypeId
   secondaryArchetype: ArchetypeId
@@ -157,6 +174,7 @@ export interface StackOutput {
   explanation: string
   alternateOption: AlternateOption
   planningLayer: PlanningLayer
+  support: SupportContent
 }
 
 // ─── Scoring Types ─────────────────────────────────────────────────────────────

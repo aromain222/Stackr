@@ -14,7 +14,7 @@ import { CREDIT_STAGES } from '@/lib/credit'
 import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
-import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory } from '@/lib/types'
+import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock } from '@/lib/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -183,10 +183,12 @@ function StackMapRow({
 function RecommendationCard({
   category,
   rec,
+  support,
   index,
 }: {
   category: keyof typeof CATEGORY_META
   rec: Recommendation
+  support: SupportBlock
   index: number
 }) {
   const meta = CATEGORY_META[category]
@@ -251,6 +253,22 @@ function RecommendationCard({
             </p>
             <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.focusNow}</p>
           </div>
+        </div>
+
+        {/* Contextual support layer */}
+        <div className="mt-5 pt-5 border-t border-[#1C2030] space-y-2.5">
+          <p className="text-xs text-[#4A5166] leading-relaxed">
+            <span className="font-medium">Why this category — </span>
+            {support.categoryMatter}
+          </p>
+          <p className="text-xs text-[#4A5166] leading-relaxed">
+            <span className="font-medium">Why this fits now — </span>
+            {support.fitNow}
+          </p>
+          <p className="text-xs text-[#4A5166] leading-relaxed">
+            <span className="font-medium">Watch out for — </span>
+            {support.watchOut}
+          </p>
         </div>
       </div>
     </motion.div>
@@ -433,10 +451,10 @@ export default function ResultsPage() {
             The full breakdown
           </p>
           <div className="space-y-4">
-            <RecommendationCard category="checking" rec={stack.checkingRecommendation} index={0} />
-            <RecommendationCard category="savings" rec={stack.savingsRecommendation} index={1} />
-            <RecommendationCard category="credit" rec={stack.creditRecommendation} index={2} />
-            <RecommendationCard category="investing" rec={stack.investingRecommendation} index={3} />
+            <RecommendationCard category="checking" rec={stack.checkingRecommendation} support={stack.support.checking} index={0} />
+            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} index={1} />
+            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} index={2} />
+            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} index={3} />
           </div>
         </motion.section>
 
@@ -472,6 +490,22 @@ export default function ResultsPage() {
                   {stack.retirementGuidance.explanation}
                 </p>
               </div>
+            </div>
+
+            {/* Retirement support layer */}
+            <div className="mt-5 pt-5 border-t border-[#1C2030] space-y-2.5">
+              <p className="text-xs text-[#4A5166] leading-relaxed">
+                <span className="font-medium">Why this category — </span>
+                {stack.support.retirement.categoryMatter}
+              </p>
+              <p className="text-xs text-[#4A5166] leading-relaxed">
+                <span className="font-medium">Why this fits now — </span>
+                {stack.support.retirement.fitNow}
+              </p>
+              <p className="text-xs text-[#4A5166] leading-relaxed">
+                <span className="font-medium">Watch out for — </span>
+                {stack.support.retirement.watchOut}
+              </p>
             </div>
           </div>
         </motion.section>
