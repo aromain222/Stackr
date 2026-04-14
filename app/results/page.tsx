@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Layers, RefreshCw } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Layers, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,8 @@ import { INSTITUTIONS } from '@/lib/institutions'
 import { CREDIT_STAGES } from '@/lib/credit'
 import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
-import type { StackOutput, UserAnswers, Recommendation, PlanningLayer, PlanningCategory } from '@/lib/types'
+import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
+import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory } from '@/lib/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -317,22 +318,21 @@ export default function ResultsPage() {
   const [generating, setGenerating] = useState(true)
 
   useEffect(() => {
-    const raw = localStorage.getItem('stackwise_answers')
-    if (!raw) {
-      router.push('/onboarding')
-      return
-    }
-
-    let answers: UserAnswers
-    try {
-      answers = JSON.parse(raw)
-    } catch {
+    const answers = loadAnswers()
+    if (!answers) {
       router.push('/onboarding')
       return
     }
 
     const result = generateStack(answers)
     setStack(result)
+
+    // Persist lightweight meta for the landing page return-user experience
+    saveMeta({
+      savedAt: new Date().toISOString(),
+      archetypeName: ARCHETYPES[result.primaryArchetype].name,
+      creditStageName: CREDIT_STAGES[result.creditStage].name,
+    })
 
     // Show generation animation for at least 2.2s
     const timer = setTimeout(() => setGenerating(false), 2200)
@@ -359,8 +359,8 @@ export default function ResultsPage() {
         </div>
         <Link href="/onboarding">
           <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <RefreshCw className="w-3 h-3" />
-            Start over
+            <RotateCcw className="w-3 h-3" />
+            Update answers
           </Button>
         </Link>
       </nav>
@@ -561,12 +561,25 @@ export default function ResultsPage() {
           <p className="text-sm text-[#4A5166] mb-4">
             Built for where you are right now. Start with step one.
           </p>
-          <Link href="/onboarding">
-            <Button variant="outline" size="md" className="gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" />
-              Start over
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/onboarding">
+              <Button variant="outline" size="md" className="gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5" />
+                Update answers
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="md"
+              className="text-[#4A5166] hover:text-[#7C8599] gap-1.5"
+              onClick={() => {
+                clearProfile()
+                router.push('/')
+              }}
+            >
+              Start fresh
             </Button>
-          </Link>
+          </div>
         </motion.div>
 
       </div>

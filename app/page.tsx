@@ -1,9 +1,13 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, Layers } from 'lucide-react'
+import { ArrowRight, Layers, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { loadMeta, loadAnswers, clearProfile, formatSavedDate } from '@/lib/storage'
+import type { SavedMeta } from '@/lib/storage'
 
 const STACK_PREVIEW = [
   {
@@ -43,6 +47,25 @@ const fadeUp = {
 }
 
 export default function WelcomePage() {
+  const router = useRouter()
+  const [meta, setMeta] = useState<SavedMeta | null>(null)
+  const [hasAnswers, setHasAnswers] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMeta(loadMeta())
+    setHasAnswers(loadAnswers() !== null)
+    setMounted(true)
+  }, [])
+
+  function handleStartFresh() {
+    clearProfile()
+    setMeta(null)
+    setHasAnswers(false)
+  }
+
+  const isReturning = mounted && hasAnswers
+
   return (
     <main className="min-h-screen bg-[#080A0F] flex flex-col">
       {/* Nav */}
@@ -89,19 +112,54 @@ export default function WelcomePage() {
             Answer 8 questions. Get matched to the right accounts across checking, savings, credit, and investing — each with a specific explanation of why it fits your situation.
           </motion.p>
 
-          {/* CTA */}
-          <motion.div variants={fadeUp} className="mb-6">
-            <Link href="/onboarding">
-              <Button size="xl" className="group">
-                Build My Stack
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-              </Button>
-            </Link>
+          {/* CTA — branches on return user state */}
+          <motion.div variants={fadeUp} className="mb-4">
+            {isReturning ? (
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link href="/results">
+                  <Button size="xl" className="group">
+                    View my stack
+                    <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </Button>
+                </Link>
+                <Link href="/onboarding">
+                  <Button size="xl" variant="outline">
+                    Update answers
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <Link href="/onboarding">
+                <Button size="xl" className="group">
+                  Build My Stack
+                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </Button>
+              </Link>
+            )}
           </motion.div>
 
-          <motion.p variants={fadeUp} className="text-xs text-[#4A5166]">
-            2 minutes · No account required · Completely free
-          </motion.p>
+          {/* Meta row — return user info or new user disclaimer */}
+          <motion.div variants={fadeUp} className="h-5 flex items-center justify-center">
+            {isReturning ? (
+              <p className="text-xs text-[#4A5166] flex items-center gap-2">
+                {meta
+                  ? `${meta.archetypeName} profile · Updated ${formatSavedDate(meta.savedAt)}`
+                  : 'Previous answers found'}
+                <span className="text-[#2D3247]">·</span>
+                <button
+                  onClick={handleStartFresh}
+                  className="text-[#4A5166] hover:text-[#7C8599] transition-colors duration-150 inline-flex items-center gap-1"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  Start fresh
+                </button>
+              </p>
+            ) : (
+              <p className="text-xs text-[#4A5166]">
+                2 minutes · No account required · Completely free
+              </p>
+            )}
+          </motion.div>
         </motion.div>
 
         {/* Stack Preview */}

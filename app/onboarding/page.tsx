@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { QUESTIONS } from '@/lib/questions'
+import { loadAnswers, saveAnswers } from '@/lib/storage'
 import type { UserAnswers } from '@/lib/types'
 
 type PartialAnswers = Partial<UserAnswers>
@@ -32,7 +33,10 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [dir, setDir] = useState(1)
-  const [answers, setAnswers] = useState<PartialAnswers>({})
+  const [answers, setAnswers] = useState<PartialAnswers>(() => loadAnswers() ?? {})
+
+  // True if the user already had a saved profile when they opened this page
+  const isEditing = Object.keys(answers).length > 0
 
   const question = QUESTIONS[step]
   const selectedId = answers[question.key] as string | undefined
@@ -50,7 +54,7 @@ export default function OnboardingPage() {
           setStep((s) => s + 1)
         } else {
           // Final step — save and navigate
-          localStorage.setItem('stackwise_answers', JSON.stringify(newAnswers))
+          saveAnswers(newAnswers as UserAnswers)
           router.push('/results')
         }
       }, 280)
@@ -213,11 +217,11 @@ export default function OnboardingPage() {
               <Button
                 size="md"
                 onClick={() => {
-                  localStorage.setItem('stackwise_answers', JSON.stringify(answers))
+                  saveAnswers(answers as UserAnswers)
                   router.push('/results')
                 }}
               >
-                Build My Stack
+                {isEditing ? 'Update My Stack' : 'Build My Stack'}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </motion.div>
