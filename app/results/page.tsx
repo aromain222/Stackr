@@ -13,7 +13,7 @@ import { INSTITUTIONS } from '@/lib/institutions'
 import { CREDIT_STAGES } from '@/lib/credit'
 import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
-import type { StackOutput, UserAnswers, Recommendation } from '@/lib/types'
+import type { StackOutput, UserAnswers, Recommendation, PlanningLayer, PlanningCategory } from '@/lib/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +28,14 @@ const PRIORITY_COLOR = {
   high: '#00D4A0',
   medium: '#5B8BF5',
   low: '#4A5166',
+}
+
+const PLANNING_CATEGORY_COLOR: Record<PlanningCategory, string> = {
+  banking: '#5B8BF5',
+  savings: '#00D4A0',
+  credit: '#F5A623',
+  investing: '#C084FC',
+  retirement: '#C084FC',
 }
 
 const ARCHETYPE_BADGE_VARIANT: Record<string, 'default' | 'success' | 'warning' | 'purple' | 'muted'> = {
@@ -248,6 +256,59 @@ function RecommendationCard({
   )
 }
 
+// ─── Now vs Later section ──────────────────────────────────────────────────────
+
+function NowLaterSection({ planning }: { planning: PlanningLayer }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
+        Now vs Later
+      </p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {/* Now card */}
+        <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#F0F2F8] mb-4">
+            Right now
+          </p>
+          <ul className="space-y-3">
+            {planning.nowPriorities.map((item, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+                  style={{ backgroundColor: PLANNING_CATEGORY_COLOR[item.category] }}
+                />
+                <span className="text-sm text-[#D0D5E8] leading-snug">{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Later card */}
+        <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#4A5166] mb-4">
+            Once you level up
+          </p>
+          <ul className="space-y-3">
+            {planning.laterOpportunities.map((item, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <span
+                  className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0 opacity-50"
+                  style={{ backgroundColor: PLANNING_CATEGORY_COLOR[item.category] }}
+                />
+                <span className="text-sm text-[#7C8599] leading-snug">{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </motion.section>
+  )
+}
+
 // ─── Main results page ─────────────────────────────────────────────────────────
 
 export default function ResultsPage() {
@@ -356,10 +417,13 @@ export default function ResultsPage() {
           </div>
         </motion.section>
 
+        {/* ── Section 3: Now vs Later ── */}
+        <NowLaterSection planning={stack.planningLayer} />
+
         {/* Divider */}
         <div className="border-t border-[#1C2030]" />
 
-        {/* ── Section 3: Recommendation Cards ── */}
+        {/* ── Section 4: Recommendation Cards ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -379,7 +443,7 @@ export default function ResultsPage() {
         {/* Divider */}
         <div className="border-t border-[#1C2030]" />
 
-        {/* ── Section 4: Retirement ── */}
+        {/* ── Section 5: Retirement ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -415,7 +479,7 @@ export default function ResultsPage() {
         {/* Divider */}
         <div className="border-t border-[#1C2030]" />
 
-        {/* ── Section 5: Action Plan ── */}
+        {/* ── Section 6: Action Plan ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -464,7 +528,7 @@ export default function ResultsPage() {
         {/* Divider */}
         <div className="border-t border-[#1C2030]" />
 
-        {/* ── Section 6: Alternate Option ── */}
+        {/* ── Section 7: Alternate Option ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

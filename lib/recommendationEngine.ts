@@ -4,6 +4,8 @@ import type {
   Recommendation,
   NextMove,
   AlternateOption,
+  PlanningItem,
+  PlanningLayer,
   ArchetypeId,
   CreditStageId,
   InvestingReadinessId,
@@ -478,6 +480,92 @@ function getAlternateOption(archetype: ArchetypeId, answers: UserAnswers): Alter
   }
 }
 
+// ─── Now vs Later planning layer ──────────────────────────────────────────────
+
+function generatePlanningLayer(
+  archetype: ArchetypeId,
+  creditStage: CreditStageId,
+  investingReadiness: InvestingReadinessId,
+  answers: UserAnswers
+): PlanningLayer {
+  const now: PlanningItem[] = []
+  const later: PlanningItem[] = []
+
+  // ── NOW: debt is the highest blocker ────────────────────────────────────────
+  if (answers.debtSituation === 'carries_balance') {
+    now.push({ label: 'Clear revolving credit card debt', category: 'credit' })
+  }
+
+  // ── NOW: emergency fund ──────────────────────────────────────────────────────
+  if (answers.emergencyFund === 'none') {
+    now.push({ label: 'Open a high-yield savings account', category: 'savings' })
+  } else if (answers.emergencyFund === 'under_1mo') {
+    now.push({ label: 'Build toward 3 months of expenses saved', category: 'savings' })
+  } else if (answers.emergencyFund === 'one_3mo') {
+    now.push({ label: 'Complete your 3-month emergency fund', category: 'savings' })
+  }
+
+  // ── NOW: credit foundation ───────────────────────────────────────────────────
+  if (creditStage === 'no_credit') {
+    now.push({ label: 'Establish your first credit account', category: 'credit' })
+  } else if (answers.creditSituation === 'multiple_late') {
+    now.push({ label: '12 consecutive months of on-time payments', category: 'credit' })
+  }
+
+  // ── NOW: retirement check ────────────────────────────────────────────────────
+  if (answers.retirement === 'dont_know') {
+    now.push({ label: 'Check your HR portal for an uncaptured 401k match', category: 'retirement' })
+  } else if (answers.retirement === 'want_to_start') {
+    now.push({ label: 'Open a Roth IRA — Fidelity, no minimum required', category: 'retirement' })
+  } else if (answers.retirement === '401k_with_match') {
+    now.push({ label: 'Confirm you\'re capturing the full employer match', category: 'retirement' })
+  }
+
+  // ── NOW: archetype-specific banking or discipline ───────────────────────────
+  if (archetype === 'digital_optimizer' || archetype === 'early_wealth_starter') {
+    now.push({ label: 'Enable direct deposit to unlock the full 4.60% savings rate', category: 'banking' })
+  } else if (archetype === 'rewards_builder') {
+    now.push({ label: 'Full-balance autopay on every card', category: 'credit' })
+  }
+
+  // ── LATER: credit upgrade path ───────────────────────────────────────────────
+  if (creditStage === 'no_credit') {
+    later.push({ label: 'Upgrade to a rewards card after 12 months of history', category: 'credit' })
+  } else if (creditStage === 'early_builder') {
+    later.push({ label: 'Apply for a no-fee rewards card once score crosses 670', category: 'credit' })
+  } else if (creditStage === 'emerging_optimizer') {
+    later.push({ label: 'Add a premium travel or cash back card', category: 'credit' })
+  }
+
+  // ── LATER: investing path ────────────────────────────────────────────────────
+  if (investingReadiness === 'not_ready') {
+    later.push({ label: 'Open a Roth IRA once emergency fund is fully funded', category: 'investing' })
+  } else if (investingReadiness === 'conservative') {
+    later.push({ label: 'Increase Roth IRA contribution rate as income grows', category: 'retirement' })
+  } else if (investingReadiness === 'moderate') {
+    later.push({ label: 'Max Roth IRA contributions ($7,000/year)', category: 'retirement' })
+    later.push({ label: 'Open a taxable brokerage once tax-advantaged space is maxed', category: 'investing' })
+  } else if (investingReadiness === 'growth') {
+    later.push({ label: 'Open a taxable brokerage for investing beyond Roth IRA limits', category: 'investing' })
+  }
+
+  // ── LATER: archetype-specific upgrades ──────────────────────────────────────
+  if (
+    archetype === 'traditional_hybrid' &&
+    (creditStage === 'emerging_optimizer' || creditStage === 'rewards_optimizer')
+  ) {
+    later.push({ label: 'Build toward the Chase Sapphire ecosystem', category: 'credit' })
+  }
+  if (archetype === 'rewards_builder' && creditStage === 'rewards_optimizer') {
+    later.push({ label: 'Add Chase Freedom Flex for 5% rotating categories', category: 'credit' })
+  }
+
+  return {
+    nowPriorities: now.slice(0, 4),
+    laterOpportunities: later.slice(0, 3),
+  }
+}
+
 // ─── Main engine — pure function ──────────────────────────────────────────────
 
 export function generateStack(answers: UserAnswers): StackOutput {
@@ -496,6 +584,7 @@ export function generateStack(answers: UserAnswers): StackOutput {
   const nextMoves = generateNextMoves(primaryArchetype, creditStage, investingReadiness, answers)
   const explanation = generateExplanation(primaryArchetype, secondaryArchetype, answers)
   const alternateOption = getAlternateOption(primaryArchetype, answers)
+  const planningLayer = generatePlanningLayer(primaryArchetype, creditStage, investingReadiness, answers)
 
   return {
     primaryArchetype,
@@ -511,5 +600,6 @@ export function generateStack(answers: UserAnswers): StackOutput {
     nextMoves,
     explanation,
     alternateOption,
+    planningLayer,
   }
 }

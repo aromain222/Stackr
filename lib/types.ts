@@ -128,6 +128,20 @@ export interface AlternateOption {
   reason: string
 }
 
+export type PlanningCategory = 'banking' | 'savings' | 'credit' | 'investing' | 'retirement'
+
+export interface PlanningItem {
+  label: string
+  category: PlanningCategory
+}
+
+export interface PlanningLayer {
+  /** 2–4 items: current blockers and foundations to address right now */
+  nowPriorities: PlanningItem[]
+  /** 2–3 items: opportunities that open once the now layer is handled */
+  laterOpportunities: PlanningItem[]
+}
+
 export interface StackOutput {
   primaryArchetype: ArchetypeId
   secondaryArchetype: ArchetypeId
@@ -142,6 +156,7 @@ export interface StackOutput {
   nextMoves: NextMove[]
   explanation: string
   alternateOption: AlternateOption
+  planningLayer: PlanningLayer
 }
 
 // ─── Scoring Types ─────────────────────────────────────────────────────────────
