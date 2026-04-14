@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Layers, RotateCcw } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { CheckCircle2, Layers, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Logo } from '@/components/ui/logo'
 import { generateStack } from '@/lib/recommendationEngine'
 import { ARCHETYPES } from '@/lib/archetypes'
 import { INSTITUTIONS } from '@/lib/institutions'
@@ -258,14 +259,14 @@ function RecommendationCard({
         {/* Why this fits */}
         <div className="space-y-4">
           <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
-            <p className="text-xs text-[#5B8BF5] uppercase tracking-widest font-medium mb-2">
+            <p className="card-label text-[#5B8BF5] mb-2">
               Why this one
             </p>
             <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.why}</p>
           </div>
 
           <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
-            <p className="text-xs text-[#7C8599] uppercase tracking-widest font-medium mb-2">
+            <p className="card-label text-[#7C8599] mb-2">
               Why not the others
             </p>
             <p className="text-sm text-[#7C8599] leading-relaxed">{rec.whyNotAlternatives}</p>
@@ -276,7 +277,7 @@ function RecommendationCard({
             style={{ backgroundColor: `${meta.color}0D`, borderColor: `${meta.color}30` }}
           >
             <p
-              className="text-xs uppercase tracking-widest font-medium mb-2"
+              className="card-label mb-2"
               style={{ color: meta.color }}
             >
               Focus now
@@ -314,7 +315,7 @@ function NowLaterSection({ planning }: { planning: PlanningLayer }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
+      <p className="section-label mb-4">
         Now vs Later
       </p>
       <div className="grid sm:grid-cols-2 gap-3">
@@ -447,10 +448,7 @@ export default function ResultsPage() {
     <div className="min-h-screen bg-[#080A0F] pb-20">
       {/* Nav */}
       <nav className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 max-w-2xl mx-auto w-full bg-[#080A0F]/90 backdrop-blur-md border-b border-[#1C2030]">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#5B8BF5]" />
-          <span className="text-sm font-medium text-[#7C8599]">Stackwise</span>
-        </div>
+        <Logo size="sm" />
         <Link href="/onboarding">
           <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
             <RotateCcw className="w-3 h-3" />
@@ -470,7 +468,7 @@ export default function ResultsPage() {
           <Badge variant={ARCHETYPE_BADGE_VARIANT[stack.primaryArchetype] ?? 'default'} className="mb-4">
             Your Archetype
           </Badge>
-          <h1 className="text-4xl font-bold text-[#F0F2F8] tracking-tight mb-2">
+          <h1 className="text-4xl font-bold text-[#F0F2F8] tracking-tight leading-tight mb-2">
             {archetype.name}
           </h1>
           <p className="text-lg text-[#7C8599] mb-1">{archetype.tagline}</p>
@@ -500,7 +498,7 @@ export default function ResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
+          <p className="section-label mb-4">
             Your Stack
           </p>
           <div className="space-y-2">
@@ -523,7 +521,7 @@ export default function ResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-5">
+          <p className="section-label mb-5">
             The full breakdown
           </p>
           <div className="space-y-4">
@@ -543,7 +541,7 @@ export default function ResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
+          <p className="section-label mb-4">
             Retirement
           </p>
           <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-6">
@@ -595,7 +593,7 @@ export default function ResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-5">
+          <p className="section-label mb-5">
             Where to start
           </p>
           <div className="space-y-3">
@@ -646,7 +644,7 @@ export default function ResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs text-[#4A5166] uppercase tracking-widest font-medium mb-4">
+          <p className="section-label mb-4">
             Worth knowing
           </p>
           <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-6">

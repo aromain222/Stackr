@@ -52,6 +52,14 @@
     text-wrap: balance;
   }
 
+  .section-label {
+    @apply text-xs text-[#4A5166] uppercase tracking-widest font-medium;
+  }
+
+  .card-label {
+    @apply text-xs uppercase tracking-widest font-medium;
+  }
+
   .gradient-brand {
     background: linear-gradient(135deg, #5B8BF5 0%, #7B6CF6 100%);
   }

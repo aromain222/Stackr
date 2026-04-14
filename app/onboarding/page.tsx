@@ -3,8 +3,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Layers } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
 import { QUESTIONS } from '@/lib/questions'
 import { loadAnswers, saveAnswers } from '@/lib/storage'
@@ -91,10 +92,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-[#080A0F] flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#5B8BF5]" />
-          <span className="text-sm font-medium text-[#7C8599]">Stackwise</span>
-        </div>
+        <Logo size="sm" />
         <span className="text-xs text-[#4A5166] tabular-nums">
           {step + 1} of {QUESTIONS.length}
         </span>
@@ -119,7 +117,7 @@ export default function OnboardingPage() {
           >
             {/* Question header */}
             <div className="mb-8">
-              <p className="text-xs text-[#5B8BF5] uppercase tracking-widest font-medium mb-3">
+              <p className="card-label text-[#5B8BF5] mb-3">
                 Question {step + 1}
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-[#F0F2F8] tracking-tight leading-tight mb-3">

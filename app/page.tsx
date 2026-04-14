@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, Layers, RotateCcw } from 'lucide-react'
+import { ArrowRight, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
 import { loadMeta, loadAnswers, clearProfile, formatSavedDate } from '@/lib/storage'
 import { track } from '@/lib/analytics'
 import type { SavedMeta } from '@/lib/storage'
@@ -72,10 +73,7 @@ export default function WelcomePage() {
     <main className="min-h-screen bg-[#080A0F] flex flex-col">
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <Layers className="w-5 h-5 text-[#5B8BF5]" />
-          <span className="font-semibold text-[#F0F2F8] tracking-tight">Stackwise</span>
-        </div>
+        <Logo size="md" />
         <span className="text-xs text-[#4A5166] uppercase tracking-widest font-medium">
           Free · No account required
         </span>
@@ -148,13 +146,15 @@ export default function WelcomePage() {
                   ? `${meta.archetypeName} profile · Updated ${formatSavedDate(meta.savedAt)}`
                   : 'Previous answers found'}
                 <span className="text-[#2D3247]">·</span>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleStartFresh}
-                  className="text-[#4A5166] hover:text-[#7C8599] transition-colors duration-150 inline-flex items-center gap-1"
+                  className="h-auto p-0 text-[#4A5166] hover:text-[#7C8599] hover:bg-transparent gap-1 text-xs font-normal"
                 >
                   <RotateCcw className="w-2.5 h-2.5" />
                   Start fresh
-                </button>
+                </Button>
               </p>
             ) : (
               <p className="text-xs text-[#4A5166]">
@@ -173,7 +173,7 @@ export default function WelcomePage() {
         >
           <motion.p
             variants={fadeUp}
-            className="text-xs text-[#4A5166] uppercase tracking-widest font-medium text-center mb-5"
+            className="section-label text-center mb-5"
           >
             What's included
           </motion.p>
