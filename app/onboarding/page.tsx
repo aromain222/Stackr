@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Layers } from 'lucide-react'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { QUESTIONS } from '@/lib/questions'
 import { loadAnswers, saveAnswers } from '@/lib/storage'
+import { track } from '@/lib/analytics'
 import type { UserAnswers } from '@/lib/types'
 
 type PartialAnswers = Partial<UserAnswers>
@@ -38,6 +39,16 @@ export default function OnboardingPage() {
   // True if the user already had a saved profile when they opened this page
   const isEditing = Object.keys(answers).length > 0
 
+  // Track each step as it becomes active
+  useEffect(() => {
+    const q = QUESTIONS[step]
+    track('onboarding_step_viewed', {
+      step: step + 1,
+      step_key: q.key,
+      total_steps: QUESTIONS.length,
+    })
+  }, [step])
+
   const question = QUESTIONS[step]
   const selectedId = answers[question.key] as string | undefined
   const progress = ((step) / QUESTIONS.length) * 100
@@ -47,6 +58,12 @@ export default function OnboardingPage() {
       const newAnswers = { ...answers, [question.key]: optionId }
       setAnswers(newAnswers)
 
+      track('onboarding_answer_selected', {
+        step: step + 1,
+        step_key: question.key,
+        answer_id: optionId,
+      })
+
       // Auto-advance after brief delay
       setTimeout(() => {
         if (step < QUESTIONS.length - 1) {
@@ -54,12 +71,13 @@ export default function OnboardingPage() {
           setStep((s) => s + 1)
         } else {
           // Final step — save and navigate
+          track('onboarding_completed', { is_edit: isEditing })
           saveAnswers(newAnswers as UserAnswers)
           router.push('/results')
         }
       }, 280)
     },
-    [answers, question.key, step, router]
+    [answers, question.key, step, isEditing, router]
   )
 
   const goBack = useCallback(() => {
@@ -217,6 +235,7 @@ export default function OnboardingPage() {
               <Button
                 size="md"
                 onClick={() => {
+                  track('onboarding_completed', { is_edit: isEditing })
                   saveAnswers(answers as UserAnswers)
                   router.push('/results')
                 }}

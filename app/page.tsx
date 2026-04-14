@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Layers, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { loadMeta, loadAnswers, clearProfile, formatSavedDate } from '@/lib/storage'
+import { track } from '@/lib/analytics'
 import type { SavedMeta } from '@/lib/storage'
 
 const STACK_PREVIEW = [
@@ -60,6 +61,7 @@ export default function WelcomePage() {
 
   function handleStartFresh() {
     clearProfile()
+    track('profile_reset', {})
     setMeta(null)
     setHasAnswers(false)
   }
@@ -117,20 +119,20 @@ export default function WelcomePage() {
             {isReturning ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/results">
-                  <Button size="xl" className="group">
+                  <Button size="xl" className="group" onClick={() => track('cta_clicked', { variant: 'returning_view' })}>
                     View my stack
                     <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
                 <Link href="/onboarding">
-                  <Button size="xl" variant="outline">
+                  <Button size="xl" variant="outline" onClick={() => track('cta_clicked', { variant: 'returning_update' })}>
                     Update answers
                   </Button>
                 </Link>
               </div>
             ) : (
               <Link href="/onboarding">
-                <Button size="xl" className="group">
+                <Button size="xl" className="group" onClick={() => track('cta_clicked', { variant: 'new_user' })}>
                   Build My Stack
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Button>

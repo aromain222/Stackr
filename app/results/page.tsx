@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, CheckCircle2, Layers, RotateCcw } from 'lucide-react'
@@ -14,6 +14,7 @@ import { CREDIT_STAGES } from '@/lib/credit'
 import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
+import { track } from '@/lib/analytics'
 import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock } from '@/lib/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -364,6 +365,8 @@ export default function ResultsPage() {
   const [stack, setStack] = useState<StackOutput | null>(null)
   const [generating, setGenerating] = useState(true)
   const [error, setError] = useState(false)
+  const alternateOptionRef = useRef<HTMLElement>(null)
+  const hasTrackedResults = useRef(false)
 
   useEffect(() => {
     const answers = loadAnswers()
@@ -371,6 +374,8 @@ export default function ResultsPage() {
       router.push('/onboarding')
       return
     }
+
+    track('stack_generation_started', {})
 
     let result: StackOutput
     try {
@@ -394,6 +399,35 @@ export default function ResultsPage() {
     const timer = setTimeout(() => setGenerating(false), 2200)
     return () => clearTimeout(timer)
   }, [router])
+
+  // Track results_viewed once the animation resolves and the page is visible
+  useEffect(() => {
+    if (generating || !stack || hasTrackedResults.current) return
+    hasTrackedResults.current = true
+    track('results_viewed', {
+      primary_archetype: stack.primaryArchetype,
+      secondary_archetype: stack.secondaryArchetype,
+      credit_stage: stack.creditStage,
+      investing_readiness: stack.investingReadiness,
+    })
+  }, [generating, stack])
+
+  // Track alternate_option_viewed when the section enters the viewport
+  useEffect(() => {
+    const el = alternateOptionRef.current
+    if (!el || !stack) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          track('alternate_option_viewed', { institution: stack.alternateOption.institution })
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.25 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [stack])
 
   if (error) {
     return <ErrorScreen />
@@ -571,7 +605,8 @@ export default function ResultsPage() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35 + i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="flex gap-4 rounded-xl border border-[#1C2030] bg-[#0E1018] p-5 hover:border-[#2D3247] transition-colors duration-200"
+                onClick={() => track('action_plan_step_clicked', { move_id: move.id, move_index: i, priority: move.priority })}
+                className="flex gap-4 rounded-xl border border-[#1C2030] bg-[#0E1018] p-5 hover:border-[#2D3247] transition-colors duration-200 cursor-pointer"
               >
                 {/* Step number */}
                 <div
@@ -606,6 +641,7 @@ export default function ResultsPage() {
 
         {/* ── Section 7: Alternate Option ── */}
         <motion.section
+          ref={alternateOptionRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
