@@ -16,7 +16,7 @@ import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
 import { track } from '@/lib/analytics'
-import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow } from '@/lib/types'
+import type { StackOutput, Recommendation, AlternativeRecommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow } from '@/lib/types'
 import { EducationPanelProvider, EducationTrigger } from '@/components/ui/education-panel'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -272,6 +272,50 @@ function ComparisonTable({ rows }: { rows: ComparisonRow[] }) {
   )
 }
 
+// ─── Alternative recommendation card ──────────────────────────────────────────
+
+function AlternativeCard({
+  alt,
+  color,
+}: {
+  alt: AlternativeRecommendation
+  color: string
+}) {
+  const inst = INSTITUTIONS[alt.institution]
+  return (
+    <div className="rounded-xl border border-[#1C2030] bg-[#0E1018] p-4">
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+            <span className="text-xs font-medium text-[#7C8599]">{inst.name}</span>
+            <span className="text-xs text-[#2D3247]">·</span>
+            <span className="text-xs text-[#4A5166] truncate">{alt.product}</span>
+          </div>
+          <p className="text-sm font-medium text-[#D0D5E8] leading-snug">{alt.headline}</p>
+        </div>
+        {alt.isUpgradePath && (
+          <span
+            className="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5"
+            style={{ backgroundColor: `${color}15`, color }}
+          >
+            Later
+          </span>
+        )}
+      </div>
+      <div className="space-y-1 mt-3">
+        <p className="text-xs text-[#4A5166] leading-relaxed">
+          <span className="font-medium text-[#7C8599]">Tradeoff — </span>
+          {alt.tradeoff}
+        </p>
+        <p className="text-xs text-[#4A5166] leading-relaxed">
+          <span className="font-medium text-[#7C8599]">Best when — </span>
+          {alt.whenItWins}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Recommendation card ───────────────────────────────────────────────────────
 
 function RecommendationCard({
@@ -279,6 +323,7 @@ function RecommendationCard({
   rec,
   support,
   comparisons,
+  alternatives,
   index,
   educationTopicId,
 }: {
@@ -286,6 +331,7 @@ function RecommendationCard({
   rec: Recommendation
   support: SupportBlock
   comparisons: ComparisonRow[]
+  alternatives: AlternativeRecommendation[]
   index: number
   educationTopicId?: string
 }) {
@@ -387,6 +433,17 @@ function RecommendationCard({
             />
           </div>
         )}
+
+        {alternatives.length > 0 && (
+          <div className="mt-5 pt-5 border-t border-[#1C2030]">
+            <p className="card-label text-[#4A5166] mb-3">Alternatives</p>
+            <div className="space-y-2">
+              {alternatives.map((alt) => (
+                <AlternativeCard key={`${alt.institution}-${alt.product}`} alt={alt} color={meta.color} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -452,7 +509,6 @@ export default function ResultsPage() {
   const [stack, setStack] = useState<StackOutput | null>(null)
   const [generating, setGenerating] = useState(true)
   const [error, setError] = useState(false)
-  const alternateOptionRef = useRef<HTMLElement>(null)
   const hasTrackedResults = useRef(false)
 
   useEffect(() => {
@@ -498,23 +554,6 @@ export default function ResultsPage() {
       investing_readiness: stack.investingReadiness,
     })
   }, [generating, stack])
-
-  // Track alternate_option_viewed when the section enters the viewport
-  useEffect(() => {
-    const el = alternateOptionRef.current
-    if (!el || !stack) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          track('alternate_option_viewed', { institution: stack.alternateOption.institution })
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.25 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [stack])
 
   if (error) {
     return <ErrorScreen />
@@ -595,9 +634,9 @@ export default function ResultsPage() {
             Your Stack
           </p>
           <div className="space-y-2">
-            <StackMapRow category="checking" rec={stack.checkingRecommendation} index={0} />
-            <StackMapRow category="savings" rec={stack.savingsRecommendation} index={1} />
-            <StackMapRow category="credit" rec={stack.creditRecommendation} index={2} />
+            <StackMapRow category="checking" rec={stack.checking.primary} index={0} />
+            <StackMapRow category="savings" rec={stack.savings.primary} index={1} />
+            <StackMapRow category="credit" rec={stack.credit.primary} index={2} />
             <StackMapRow category="investing" rec={stack.investingRecommendation} index={3} />
           </div>
         </motion.section>
@@ -618,10 +657,10 @@ export default function ResultsPage() {
             The full breakdown
           </p>
           <div className="space-y-4">
-            <RecommendationCard category="checking" rec={stack.checkingRecommendation} support={stack.support.checking} comparisons={stack.comparisons.checking} index={0} />
-            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} comparisons={stack.comparisons.savings} index={1} educationTopicId="apy" />
-            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} comparisons={stack.comparisons.credit} index={2} educationTopicId="credit_score" />
-            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} index={3} educationTopicId="compounding" />
+            <RecommendationCard category="checking" rec={stack.checking.primary} support={stack.support.checking} comparisons={stack.comparisons.checking} alternatives={stack.checking.alternatives} index={0} />
+            <RecommendationCard category="savings" rec={stack.savings.primary} support={stack.support.savings} comparisons={stack.comparisons.savings} alternatives={stack.savings.alternatives} index={1} educationTopicId="apy" />
+            <RecommendationCard category="credit" rec={stack.credit.primary} support={stack.support.credit} comparisons={stack.comparisons.credit} alternatives={stack.credit.alternatives} index={2} educationTopicId="credit_score" />
+            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} alternatives={[]} index={3} educationTopicId="compounding" />
           </div>
         </motion.section>
 
@@ -727,33 +766,6 @@ export default function ResultsPage() {
                 </div>
               </motion.div>
             ))}
-          </div>
-        </motion.section>
-
-        {/* Divider */}
-        <div className="border-t border-[#1C2030]" />
-
-        {/* ── Section 7: Alternate Option ── */}
-        <motion.section
-          ref={alternateOptionRef}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <p className="section-label mb-4">
-            Also worth considering
-          </p>
-          <div className="rounded-2xl border border-[#1C2030] bg-[#0E1018] p-6">
-            <div className="flex items-start gap-3">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-[#F0F2F8] mb-1">
-                  {INSTITUTIONS[stack.alternateOption.institution].name} — {stack.alternateOption.product}
-                </p>
-                <p className="text-sm text-[#7C8599] leading-relaxed">
-                  {stack.alternateOption.reason}
-                </p>
-              </div>
-            </div>
           </div>
         </motion.section>
 

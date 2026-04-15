@@ -129,6 +129,18 @@ export interface AlternateOption {
   reason: string
 }
 
+export interface AlternativeRecommendation {
+  institution: InstitutionId
+  product: string
+  headline: string
+  /** One-line explanation of what you give up vs. the primary */
+  tradeoff: string
+  /** The specific condition under which this alternative becomes the better choice */
+  whenItWins: string
+  /** True if this option is relevant in a future state, not the user's current situation */
+  isUpgradePath: boolean
+}
+
 // ─── Institution comparison row ────────────────────────────────────────────────
 // Shown as a compact table inside each recommendation card so users can see
 // why the recommended option was chosen over specific alternatives.
@@ -178,20 +190,24 @@ export interface SupportContent {
   retirement: SupportBlock
 }
 
+export interface CategoryStack {
+  primary: Recommendation
+  alternatives: AlternativeRecommendation[]
+}
+
 export interface StackOutput {
   primaryArchetype: ArchetypeId
   secondaryArchetype: ArchetypeId
   creditStage: CreditStageId
   investingReadiness: InvestingReadinessId
   investingStyle: string
-  checkingRecommendation: Recommendation
-  savingsRecommendation: Recommendation
-  creditRecommendation: Recommendation
+  checking: CategoryStack
+  savings: CategoryStack
+  credit: CategoryStack
   investingRecommendation: Recommendation
   retirementGuidance: RetirementGuidance
   nextMoves: NextMove[]
   explanation: string
-  alternateOption: AlternateOption
   planningLayer: PlanningLayer
   support: SupportContent
   /** Side-by-side institution comparisons rendered inside each recommendation card */

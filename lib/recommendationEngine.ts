@@ -2,6 +2,7 @@ import type {
   UserAnswers,
   StackOutput,
   Recommendation,
+  AlternativeRecommendation,
   NextMove,
   AlternateOption,
   PlanningItem,
@@ -539,6 +540,451 @@ function getAlternateOption(archetype: ArchetypeId, answers: UserAnswers): Alter
   }
 }
 
+// ─── Checking alternatives ────────────────────────────────────────────────────
+
+function getCheckingAlternatives(
+  archetype: ArchetypeId,
+  secondary: ArchetypeId,
+  answers: UserAnswers
+): AlternativeRecommendation[] {
+  const alts: AlternativeRecommendation[] = []
+
+  switch (archetype) {
+    case 'foundation_builder':
+      alts.push({
+        institution: 'sofi',
+        product: 'SoFi Checking & Savings',
+        headline: '4.60% on savings + 0.50% on checking, one app',
+        tradeoff: 'Requires direct deposit to unlock the full savings rate — drops to 1.20% without it',
+        whenItWins: 'Once your paycheck routes through SoFi, every idle dollar earns the top rate automatically',
+        isUpgradePath: true,
+      })
+      if (answers.bankingPreference === 'in_person' || answers.bankingPreference === 'hybrid') {
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Total Checking',
+          headline: '4,700+ branches and the top-rated banking app',
+          tradeoff: '$12/month fee unless $500+ monthly direct deposit is active',
+          whenItWins: 'When branch access is a genuine, ongoing requirement — Chase is the only bank that excels at both',
+          isUpgradePath: false,
+        })
+      }
+      break
+
+    case 'digital_optimizer':
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Checking',
+        headline: 'Zero fees, zero conditions, 4.25% savings APY',
+        tradeoff: '4.25% savings vs SoFi\'s 4.60% — the yield gap is ~$20/year on $5,000',
+        whenItWins: 'If you\'re not ready to switch direct deposit to a new bank, Capital One earns well with no requirements',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'ally',
+        product: 'Ally Interest Checking',
+        headline: '4.20% savings + 0.25% checking, purpose-built for savers',
+        tradeoff: 'Slightly lower APY than SoFi and a separate savings account vs. the integrated SoFi model',
+        whenItWins: 'If you prefer a bank purpose-built around savings tooling (Savings Buckets) over an all-in-one platform',
+        isUpgradePath: false,
+      })
+      break
+
+    case 'traditional_hybrid':
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Checking',
+        headline: 'Free forever, ~500 locations, 4.25% savings APY',
+        tradeoff: 'Smaller branch network than Chase (500 vs 4,700) and no premium card ecosystem',
+        whenItWins: 'When Chase\'s $12/month fee is a real concern — Capital One is free with zero conditions',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'sofi',
+        product: 'SoFi Checking & Savings',
+        headline: '4.60% savings + 0.50% checking, highest integrated yield',
+        tradeoff: 'No physical branches at all — fully digital',
+        whenItWins: 'If you find you rarely use branches and want to maximize yield instead of maintaining in-person access',
+        isUpgradePath: true,
+      })
+      break
+
+    case 'rewards_builder':
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Checking',
+        headline: 'Zero fees, 4.25% savings — no debit cashback but strong ecosystem',
+        tradeoff: 'No 1% debit cashback like Discover — but 4.25% savings APY earns more on idle cash',
+        whenItWins: 'If savings yield on your cash balance matters more than cashback on debit spending',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'sofi',
+        product: 'SoFi Checking & Savings',
+        headline: '0.50% on checking + 4.60% on savings with direct deposit',
+        tradeoff: 'No debit cashback — earns yield on balance instead of rewards on transactions',
+        whenItWins: 'If you want every idle dollar earning something — checking and savings both — over debit cashback',
+        isUpgradePath: false,
+      })
+      break
+
+    case 'early_wealth_starter':
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Checking',
+        headline: '4.25% savings APY — no conditions, no direct deposit required',
+        tradeoff: '4.25% savings vs SoFi\'s 4.60% — $17/year less on $5,000 but completely unconditional',
+        whenItWins: 'If you prefer a no-conditions savings rate without tying your direct deposit to a specific bank',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'fidelity',
+        product: 'Fidelity Cash Management Account',
+        headline: 'Checking + Roth IRA + brokerage in one login',
+        tradeoff: 'Lower cash yield than SoFi — optimized for investment integration, not maximum APY',
+        whenItWins: 'If having your daily cash alongside your Roth IRA and brokerage in one place matters more than maximizing APY',
+        isUpgradePath: false,
+      })
+      break
+  }
+
+  // Cap at 2 — secondary archetype ranking already baked into order above
+  void secondary
+  return alts.slice(0, 2)
+}
+
+// ─── Savings alternatives ─────────────────────────────────────────────────────
+
+function getSavingsAlternatives(
+  archetype: ArchetypeId,
+  secondary: ArchetypeId,
+  answers: UserAnswers
+): AlternativeRecommendation[] {
+  const alts: AlternativeRecommendation[] = []
+
+  switch (archetype) {
+    case 'foundation_builder':
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Performance Savings',
+        headline: '4.25% APY — slightly higher than Ally, same zero conditions',
+        tradeoff: 'No Savings Buckets feature; slightly higher rate than Ally',
+        whenItWins: 'If you already use Capital One for checking and want your savings at the same bank',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'sofi',
+        product: 'SoFi Savings (integrated with Checking)',
+        headline: '4.60% APY — highest available when direct deposit is active',
+        tradeoff: 'Requires switching direct deposit to SoFi — rate drops to 1.20% without it',
+        whenItWins: 'Once your paycheck routes through SoFi, your savings earns the highest no-fee rate automatically',
+        isUpgradePath: true,
+      })
+      break
+
+    case 'digital_optimizer':
+      alts.push({
+        institution: 'ally',
+        product: 'Ally Online Savings',
+        headline: '4.20% APY — no conditions, Savings Buckets for goal tracking',
+        tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
+        whenItWins: 'If you prefer a dedicated savings bank with named goal buckets and no strings attached to the rate',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Performance Savings',
+        headline: '4.25% APY — no conditions, between Ally and SoFi',
+        tradeoff: 'Lower yield than SoFi with DD, no integrated checking like SoFi',
+        whenItWins: 'If you want competitive yield without switching your direct deposit away from your current bank',
+        isUpgradePath: false,
+      })
+      break
+
+    case 'traditional_hybrid':
+      alts.push({
+        institution: 'amex',
+        product: 'American Express High-Yield Savings',
+        headline: '4.35% APY — slightly higher than Capital One, same no conditions',
+        tradeoff: 'Savings-only (no checking) — transfers to/from external accounts take 1–3 days',
+        whenItWins: 'If you already have an Amex relationship or want to add a high-yield savings account without switching any checking setup',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'sofi',
+        product: 'SoFi Savings (integrated with Checking)',
+        headline: '4.60% APY — highest rate, but requires moving away from Chase',
+        tradeoff: 'No branches — requires switching direct deposit and giving up the Chase ecosystem',
+        whenItWins: 'If you decide branch access matters less than maximum yield and want to consolidate onto one platform',
+        isUpgradePath: true,
+      })
+      break
+
+    case 'rewards_builder':
+      alts.push({
+        institution: 'ally',
+        product: 'Ally Online Savings',
+        headline: '4.20% APY — Savings Buckets for tracking multiple goals',
+        tradeoff: '4.20% vs Amex\'s 4.35% — $7.50/year less on $5,000',
+        whenItWins: 'If you want labeled savings goals (Emergency Fund, Travel, Down Payment) in a single account without opening multiple accounts',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'capital_one',
+        product: 'Capital One 360 Performance Savings',
+        headline: '4.25% APY — splits the difference between Ally and Amex',
+        tradeoff: 'Slightly lower than Amex, no Savings Buckets like Ally — but solid no-conditions account',
+        whenItWins: 'If you use Capital One for checking and want your savings in the same ecosystem',
+        isUpgradePath: false,
+      })
+      break
+
+    case 'early_wealth_starter':
+      alts.push({
+        institution: 'ally',
+        product: 'Ally Online Savings',
+        headline: '4.20% APY — no conditions, Savings Buckets',
+        tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
+        whenItWins: 'If you prefer keeping banking and investing on separate platforms with clean separation',
+        isUpgradePath: false,
+      })
+      alts.push({
+        institution: 'amex',
+        product: 'American Express High-Yield Savings',
+        headline: '4.35% APY — no conditions, pairs with any checking account',
+        tradeoff: 'Lower yield than SoFi with DD, savings-only (no checking product)',
+        whenItWins: 'If you want a standalone savings account with no conditions that pairs cleanly with any bank',
+        isUpgradePath: false,
+      })
+      break
+  }
+
+  void secondary
+  void answers
+  return alts.slice(0, 2)
+}
+
+// ─── Credit alternatives ──────────────────────────────────────────────────────
+
+function getCreditAlternatives(
+  creditStage: CreditStageId,
+  archetype: ArchetypeId,
+  answers: UserAnswers
+): AlternativeRecommendation[] {
+  const alts: AlternativeRecommendation[] = []
+  const primaryIsDiscover = answers.bankingPreference === 'digital'
+  const primaryIsCapOne = !primaryIsDiscover
+  const paysInFull = answers.debtSituation === 'pays_in_full'
+  const carriesBalance = answers.debtSituation === 'carries_balance'
+  const highIncome = answers.income === 'full_time_high' || answers.income === 'self_employed'
+
+  switch (creditStage) {
+    case 'no_credit':
+      if (primaryIsDiscover) {
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One Platinum Secured Card',
+          headline: 'Lower approval barrier, same credit-building result',
+          tradeoff: 'No rewards while building — but Capital One is more lenient with first-time applicants',
+          whenItWins: 'If Discover declines your application — apply here immediately as the backup',
+          isUpgradePath: false,
+        })
+      } else {
+        alts.push({
+          institution: 'discover',
+          product: 'Discover it® Secured Credit Card',
+          headline: '2% cashback at restaurants and gas while building credit',
+          tradeoff: 'Slightly higher approval bar than Capital One, but earns rewards from day one',
+          whenItWins: 'If you prefer digital banking and want to earn rewards even during the credit-building phase',
+          isUpgradePath: false,
+        })
+      }
+      alts.push({
+        institution: 'discover',
+        product: 'Discover it® Cash Back',
+        headline: '5% rotating categories — the first unsecured rewards card to target',
+        tradeoff: 'Requires 7–12 months of secured card history first — not available yet',
+        whenItWins: 'After 12 months of consistent on-time payments, your secured card history opens the door to this card',
+        isUpgradePath: true,
+      })
+      break
+
+    case 'early_builder':
+      if (answers.creditSituation === 'multiple_late') {
+        // Primary is Capital One QuicksilverOne
+        alts.push({
+          institution: 'discover',
+          product: 'Discover it® Cash Back',
+          headline: '5% rotating categories + Cashback Match in year 1',
+          tradeoff: 'Higher approval bar — typically requires 12 months of clean payment history first',
+          whenItWins: 'After 12 consecutive months of on-time payments, this is the next card to apply for',
+          isUpgradePath: true,
+        })
+      } else {
+        // Primary is Discover it Cash Back
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One QuicksilverOne Cash Rewards',
+          headline: '1.5% flat cashback — easier approval, $39/year fee',
+          tradeoff: '$39 annual fee and lower ceiling than Discover — but more lenient approval criteria',
+          whenItWins: 'If Discover declines your application — Capital One\'s approval algorithm is more lenient at this stage',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Freedom Unlimited®',
+          headline: '1.5% base + 3% dining — anchor of the Chase ecosystem',
+          tradeoff: 'Typically requires 670+ score with clean history — not yet accessible for most early builders',
+          whenItWins: 'Once your score crosses 670 and you have 12+ months of clean payment history',
+          isUpgradePath: true,
+        })
+      }
+      break
+
+    case 'emerging_optimizer': {
+      const useChase = archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter'
+      if (useChase) {
+        // Primary is Chase Freedom Unlimited
+        alts.push({
+          institution: 'discover',
+          product: 'Discover it® Cash Back',
+          headline: '5% rotating categories — higher ceiling with quarterly activation',
+          tradeoff: 'Requires activating bonus categories each quarter — more work but potentially more cashback',
+          whenItWins: 'If you\'re willing to manage quarterly categories and want to maximize cashback over ecosystem breadth',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred®',
+          headline: '3x dining, 2x travel — unlocks Chase Ultimate Rewards transfers',
+          tradeoff: '$95/year fee — points become worth 1.25–2.25¢ each for travel vs 1¢ for cash',
+          whenItWins: 'In 12–18 months once travel becomes a meaningful spend category and you want transferable points',
+          isUpgradePath: true,
+        })
+      } else {
+        // Primary is Discover it Cash Back
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Freedom Unlimited®',
+          headline: '1.5% base + 3% dining — no activation, consistent every month',
+          tradeoff: 'Lower peak rewards than Discover\'s 5% quarters — but simpler and builds toward Chase ecosystem',
+          whenItWins: 'If you prefer consistent rewards without quarterly category management',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred®',
+          headline: '3x dining + 2x travel, 14 transfer partners',
+          tradeoff: '$95/year fee — the step up to premium rewards once the foundation is solid',
+          whenItWins: 'Once your score reaches 700+ and travel becomes a primary spending category',
+          isUpgradePath: true,
+        })
+      }
+      break
+    }
+
+    case 'rewards_optimizer': {
+      if (carriesBalance) {
+        // Primary is Discover it Cash Back (balance warning)
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One Quicksilver Cash Rewards',
+          headline: '1.5% flat cashback — simpler, no categories to manage',
+          tradeoff: 'Lower earning potential than Discover\'s 5% quarters — but zero activation overhead',
+          whenItWins: 'While you focus on clearing the balance — a simpler card removes category management pressure',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred®',
+          headline: 'The premium card your score qualifies for — after the balance is cleared',
+          tradeoff: '$95/year fee, 20%+ APR — carrying a balance here costs far more than any rewards earned',
+          whenItWins: 'After 3 consecutive zero-balance statements — this is the real target once you\'re paying in full',
+          isUpgradePath: true,
+        })
+      } else if (paysInFull && (archetype === 'rewards_builder' || archetype === 'early_wealth_starter')) {
+        const useAmex = highIncome
+        if (useAmex) {
+          // Primary is Amex Gold
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — 14 airline and hotel transfer partners',
+            tradeoff: '4x dining vs Amex Gold\'s 4x — comparable category rates, but Chase has broader transfer partners',
+            whenItWins: 'If you prioritize airline/hotel transfers over Amex Membership Rewards — Chase partners include United, Hyatt, and Southwest',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Reserve®',
+            headline: '$300 travel credit, 3x travel/dining, Priority Pass lounge access',
+            tradeoff: '$550/year fee — the $300 travel credit offsets ~$300, net cost is ~$250 for heavy travelers',
+            whenItWins: 'Once travel spending exceeds $6,000/year and you use the $300 travel credit + lounge access fully',
+            isUpgradePath: true,
+          })
+        } else {
+          // Primary is Chase Sapphire Preferred
+          alts.push({
+            institution: 'amex',
+            product: 'American Express® Gold Card',
+            headline: '4x at restaurants and U.S. supermarkets — higher category multipliers',
+            tradeoff: '$250/year fee vs Sapphire\'s $95 — justified by $240 in annual credits for high food spenders',
+            whenItWins: 'If dining + grocery spending exceeds $1,000/month — 4x vs 3x earns meaningfully more at that volume',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Reserve®',
+            headline: '$300 travel credit, 3x travel/dining, superior lounge access',
+            tradeoff: '$550/year fee — net cost is ~$250 after the $300 travel credit',
+            whenItWins: 'Once travel spending exceeds $6,000/year and the $300 credit + Priority Pass is fully utilized',
+            isUpgradePath: true,
+          })
+        }
+      } else if (archetype === 'traditional_hybrid') {
+        // Primary is Chase Freedom Flex
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Freedom Unlimited®',
+          headline: '1.5% base + 3% dining — consistent, no activation required',
+          tradeoff: 'Lower peak rewards than Freedom Flex\'s 5% quarters — but earns reliably without any management',
+          whenItWins: 'If you prefer consistent rewards over maximizing quarterly category bonuses',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred®',
+          headline: '3x dining + 2x travel — unlocks full Ultimate Rewards value',
+          tradeoff: '$95/year fee — converts Freedom Flex points from 1¢ to 1.25–2.25¢ each for travel',
+          whenItWins: 'Once you want to use your Chase points for travel — the Sapphire is the unlock that multiplies every Freedom point earned',
+          isUpgradePath: true,
+        })
+      } else {
+        // Fallback: Chase Freedom Unlimited primary
+        alts.push({
+          institution: 'discover',
+          product: 'Discover it® Cash Back',
+          headline: '5% rotating categories — higher ceiling with quarterly activation',
+          tradeoff: 'More management overhead — categories rotate quarterly and must be activated manually',
+          whenItWins: 'If you\'re willing to spend 30 seconds activating categories four times a year for potentially higher annual cashback',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'chase',
+          product: 'Chase Sapphire Preferred®',
+          headline: '3x dining + 2x travel — unlocks the full Ultimate Rewards ecosystem',
+          tradeoff: '$95/year — transforms Freedom Unlimited points from 1¢ to 2.25¢ each for travel redemptions',
+          whenItWins: 'Once travel becomes a significant spend category — this card makes every Freedom Unlimited point worth significantly more',
+          isUpgradePath: true,
+        })
+      }
+      break
+    }
+  }
+
+  return alts.slice(0, 2)
+}
+
 // ─── Now vs Later planning layer ──────────────────────────────────────────────
 
 function generatePlanningLayer(
@@ -957,20 +1403,19 @@ export function generateStack(answers: UserAnswers): StackOutput {
   const investingReadiness = calculateInvestingReadiness(answers)
   const investingStyle = getInvestingStyle(investingReadiness)
 
-  const checkingRecommendation = getCheckingRecommendation(primaryArchetype, answers)
-  const savingsRecommendation = getSavingsRecommendation(primaryArchetype, answers)
-  const creditRecommendation = getCreditRecommendation(creditStage, primaryArchetype, answers)
+  const checkingPrimary = getCheckingRecommendation(primaryArchetype, answers)
+  const savingsPrimary = getSavingsRecommendation(primaryArchetype, answers)
+  const creditPrimary = getCreditRecommendation(creditStage, primaryArchetype, answers)
   const investingRecommendation = getInvestingRecommendation(investingReadiness, primaryArchetype, answers)
   const retirementGuidance = generateRetirementGuidance(answers)
   const nextMoves = generateNextMoves(primaryArchetype, creditStage, investingReadiness, answers)
   const explanation = generateExplanation(primaryArchetype, secondaryArchetype, answers)
-  const alternateOption = getAlternateOption(primaryArchetype, answers)
   const planningLayer = generatePlanningLayer(primaryArchetype, creditStage, investingReadiness, answers)
   const support = generateSupportContent(primaryArchetype, creditStage, investingReadiness, answers)
   const comparisons = {
-    checking: buildCheckingComparisons(checkingRecommendation.institution),
-    savings: buildSavingsComparisons(savingsRecommendation.institution),
-    credit: buildCreditComparisons(creditStage, creditRecommendation.institution, creditRecommendation.product),
+    checking: buildCheckingComparisons(checkingPrimary.institution),
+    savings: buildSavingsComparisons(savingsPrimary.institution),
+    credit: buildCreditComparisons(creditStage, creditPrimary.institution, creditPrimary.product),
   }
 
   return {
@@ -979,14 +1424,22 @@ export function generateStack(answers: UserAnswers): StackOutput {
     creditStage,
     investingReadiness,
     investingStyle,
-    checkingRecommendation,
-    savingsRecommendation,
-    creditRecommendation,
+    checking: {
+      primary: checkingPrimary,
+      alternatives: getCheckingAlternatives(primaryArchetype, secondaryArchetype, answers),
+    },
+    savings: {
+      primary: savingsPrimary,
+      alternatives: getSavingsAlternatives(primaryArchetype, secondaryArchetype, answers),
+    },
+    credit: {
+      primary: creditPrimary,
+      alternatives: getCreditAlternatives(creditStage, primaryArchetype, answers),
+    },
     investingRecommendation,
     retirementGuidance,
     nextMoves,
     explanation,
-    alternateOption,
     planningLayer,
     support,
     comparisons,
