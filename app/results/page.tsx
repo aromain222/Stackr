@@ -17,6 +17,7 @@ import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
 import { track } from '@/lib/analytics'
 import type { StackOutput, Recommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow } from '@/lib/types'
+import { EducationPanelProvider, EducationTrigger } from '@/components/ui/education-panel'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -279,12 +280,14 @@ function RecommendationCard({
   support,
   comparisons,
   index,
+  educationTopicId,
 }: {
   category: keyof typeof CATEGORY_META
   rec: Recommendation
   support: SupportBlock
   comparisons: ComparisonRow[]
   index: number
+  educationTopicId?: string
 }) {
   const meta = CATEGORY_META[category]
   const inst = INSTITUTIONS[rec.institution]
@@ -367,6 +370,23 @@ function RecommendationCard({
             {support.watchOut}
           </p>
         </div>
+
+        {educationTopicId && (
+          <div className="mt-4 pt-4 border-t border-[#1C2030]">
+            <EducationTrigger
+              topicId={educationTopicId}
+              label={
+                category === 'savings'
+                  ? 'What is APY?'
+                  : category === 'credit'
+                  ? 'What builds credit?'
+                  : category === 'investing'
+                  ? 'What is compounding?'
+                  : 'Learn more'
+              }
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -510,6 +530,7 @@ export default function ResultsPage() {
   const retirementColor = getRetirementStatusColor(stack.retirementGuidance.status)
 
   return (
+    <EducationPanelProvider>
     <div className="min-h-screen bg-[#080A0F] pb-20">
       {/* Nav */}
       <nav className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 max-w-2xl mx-auto w-full bg-[#080A0F]/90 backdrop-blur-md border-b border-[#1C2030]">
@@ -598,9 +619,9 @@ export default function ResultsPage() {
           </p>
           <div className="space-y-4">
             <RecommendationCard category="checking" rec={stack.checkingRecommendation} support={stack.support.checking} comparisons={stack.comparisons.checking} index={0} />
-            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} comparisons={stack.comparisons.savings} index={1} />
-            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} comparisons={stack.comparisons.credit} index={2} />
-            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} index={3} />
+            <RecommendationCard category="savings" rec={stack.savingsRecommendation} support={stack.support.savings} comparisons={stack.comparisons.savings} index={1} educationTopicId="apy" />
+            <RecommendationCard category="credit" rec={stack.creditRecommendation} support={stack.support.credit} comparisons={stack.comparisons.credit} index={2} educationTopicId="credit_score" />
+            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} index={3} educationTopicId="compounding" />
           </div>
         </motion.section>
 
@@ -635,6 +656,9 @@ export default function ResultsPage() {
                 <p className="text-sm text-[#7C8599] leading-relaxed">
                   {stack.retirementGuidance.explanation}
                 </p>
+                <div className="mt-3">
+                  <EducationTrigger topicId="roth_ira" label="What does a Roth IRA do?" />
+                </div>
               </div>
             </div>
 
@@ -766,5 +790,6 @@ export default function ResultsPage() {
 
       </div>
     </div>
+    </EducationPanelProvider>
   )
 }
