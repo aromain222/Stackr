@@ -94,6 +94,11 @@ export type InstitutionId =
   | 'ally'
   | 'discover'
   | 'fidelity'
+  | 'schwab'
+  | 'wells_fargo'
+  | 'bank_of_america'
+  | 'marcus'
+  | 'citi'
 
 // ─── Output Types ──────────────────────────────────────────────────────────────
 

@@ -596,16 +596,16 @@ function getCheckingAlternatives(
         product: 'Capital One 360 Checking',
         headline: 'Free forever, ~500 locations, 4.25% savings APY',
         tradeoff: 'Smaller branch network than Chase (500 vs 4,700) and no premium card ecosystem',
-        whenItWins: 'When Chase\'s $12/month fee is a real concern — Capital One is free with zero conditions',
+        whenItWins: "When Chase's $12/month fee is a real concern — Capital One is free with zero conditions",
         isUpgradePath: false,
       })
       alts.push({
-        institution: 'sofi',
-        product: 'SoFi Checking & Savings',
-        headline: '4.60% savings + 0.50% checking, highest integrated yield',
-        tradeoff: 'No physical branches at all — fully digital',
-        whenItWins: 'If you find you rarely use branches and want to maximize yield instead of maintaining in-person access',
-        isUpgradePath: true,
+        institution: 'bank_of_america',
+        product: 'Bank of America Advantage Plus',
+        headline: '3,900+ branches — Preferred Rewards boosts card earnings 25–75%',
+        tradeoff: 'Same 0.01% savings APY as Chase — requires a separate HYSA; Preferred Rewards requires $20k+ in deposits',
+        whenItWins: 'If you already have significant BofA balances and want credit card rewards amplified through Preferred Rewards',
+        isUpgradePath: false,
       })
       break
 
@@ -630,11 +630,11 @@ function getCheckingAlternatives(
 
     case 'early_wealth_starter':
       alts.push({
-        institution: 'capital_one',
-        product: 'Capital One 360 Checking',
-        headline: '4.25% savings APY — no conditions, no direct deposit required',
-        tradeoff: '4.25% savings vs SoFi\'s 4.60% — $17/year less on $5,000 but completely unconditional',
-        whenItWins: 'If you prefer a no-conditions savings rate without tying your direct deposit to a specific bank',
+        institution: 'schwab',
+        product: 'Schwab Investor Checking',
+        headline: 'Unlimited worldwide ATM rebates + brokerage in one login',
+        tradeoff: 'Lower savings yield than SoFi — Schwab shines on investing integration and travel, not APY',
+        whenItWins: 'If you travel frequently or want your brokerage and checking under a single Schwab login',
         isUpgradePath: false,
       })
       alts.push({
@@ -730,11 +730,11 @@ function getSavingsAlternatives(
         isUpgradePath: false,
       })
       alts.push({
-        institution: 'capital_one',
-        product: 'Capital One 360 Performance Savings',
-        headline: '4.25% APY — splits the difference between Ally and Amex',
-        tradeoff: 'Slightly lower than Amex, no Savings Buckets like Ally — but solid no-conditions account',
-        whenItWins: 'If you use Capital One for checking and want your savings in the same ecosystem',
+        institution: 'marcus',
+        product: 'Marcus by Goldman Sachs High-Yield Savings',
+        headline: '4.10% APY — Goldman Sachs brand, zero conditions, zero friction',
+        tradeoff: '4.10% vs Amex\'s 4.35% — slightly lower yield, but Goldman Sachs name carries institutional trust',
+        whenItWins: 'If brand trust and simplicity matter and you want a completely no-frills savings experience',
         isUpgradePath: false,
       })
       break
@@ -864,11 +864,11 @@ function getCreditAlternatives(
       } else {
         // Primary is Discover it Cash Back
         alts.push({
-          institution: 'chase',
-          product: 'Chase Freedom Unlimited®',
-          headline: '1.5% base + 3% dining — no activation, consistent every month',
-          tradeoff: 'Lower peak rewards than Discover\'s 5% quarters — but simpler and builds toward Chase ecosystem',
-          whenItWins: 'If you prefer consistent rewards without quarterly category management',
+          institution: 'citi',
+          product: 'Citi Double Cash® Card',
+          headline: '2% flat on everything — simpler than managing quarterly categories',
+          tradeoff: 'No 5% ceiling — flat 2% vs Discover\'s 5% quarters means lower peak earning on bonus categories',
+          whenItWins: 'If you prefer one flat rate over quarterly activation and category tracking',
           isUpgradePath: false,
         })
         alts.push({
@@ -962,11 +962,11 @@ function getCreditAlternatives(
       } else {
         // Fallback: Chase Freedom Unlimited primary
         alts.push({
-          institution: 'discover',
-          product: 'Discover it® Cash Back',
-          headline: '5% rotating categories — higher ceiling with quarterly activation',
-          tradeoff: 'More management overhead — categories rotate quarterly and must be activated manually',
-          whenItWins: 'If you\'re willing to spend 30 seconds activating categories four times a year for potentially higher annual cashback',
+          institution: 'citi',
+          product: 'Citi Double Cash® Card',
+          headline: '2% flat on everything — 1% when you buy, 1% when you pay',
+          tradeoff: 'No 5% categories or travel transfer partners — flat 2% on every purchase, every time',
+          whenItWins: 'If you want zero category management — one card, one rate, no thinking required',
           isUpgradePath: false,
         })
         alts.push({
@@ -1257,13 +1257,34 @@ const CHECKING_POOL: Partial<Record<InstitutionId, CompRowBase>> = {
     fee: '$0/month',
     caveat: null,
   },
+  schwab: {
+    institution: 'schwab',
+    product: 'Investor Checking',
+    stat: '0.45% APY + free ATMs',
+    fee: '$0/month',
+    caveat: 'Unlimited worldwide ATM rebates',
+  },
+  wells_fargo: {
+    institution: 'wells_fargo',
+    product: 'Everyday Checking',
+    stat: '4,500+ branches',
+    fee: '$10/month',
+    caveat: 'Waived with $500/month direct deposit',
+  },
+  bank_of_america: {
+    institution: 'bank_of_america',
+    product: 'Advantage Plus',
+    stat: '3,900+ branches',
+    fee: '$12/month',
+    caveat: 'Waived with qualifying direct deposit',
+  },
 }
 
 // Two best alternatives to show alongside each selected checking institution
 const CHECKING_ALTS: Partial<Record<InstitutionId, InstitutionId[]>> = {
   sofi:        ['ally', 'capital_one'],
   capital_one: ['sofi', 'chase'],
-  chase:       ['capital_one', 'sofi'],
+  chase:       ['capital_one', 'wells_fargo'],
   discover:    ['sofi', 'capital_one'],
 }
 
@@ -1303,13 +1324,20 @@ const SAVINGS_POOL: Partial<Record<InstitutionId, CompRowBase>> = {
     fee: '$0/month',
     caveat: null,
   },
+  marcus: {
+    institution: 'marcus',
+    product: 'High-Yield Savings',
+    stat: '4.10% APY',
+    fee: '$0/month',
+    caveat: null,
+  },
 }
 
 const SAVINGS_ALTS: Partial<Record<InstitutionId, InstitutionId[]>> = {
   ally:        ['sofi', 'capital_one'],
   sofi:        ['ally', 'capital_one'],
   capital_one: ['ally', 'amex'],
-  amex:        ['ally', 'capital_one'],
+  amex:        ['ally', 'marcus'],
 }
 
 function buildSavingsComparisons(selected: InstitutionId): ComparisonRow[] {
@@ -1349,6 +1377,7 @@ const CREDIT_STAGE_POOL: Record<CreditStageId, CreditCompBase[]> = {
   rewards_optimizer: [
     { institution: 'chase',       product: 'Sapphire Preferred®',      stat: '3x dining + 2x travel',         fee: '$95/year', caveat: null },
     { institution: 'amex',        product: 'Gold Card',                stat: '4x dining + groceries',         fee: '$250/year', caveat: '$240 in annual credits' },
+    { institution: 'citi',        product: 'Double Cash® Card',        stat: '2% flat on everything',         fee: '$0/year',  caveat: '1% buy + 1% pay' },
     { institution: 'discover',    product: 'Discover it® Cash Back',   stat: '5% rotating + 1% base',         fee: '$0/year',  caveat: null },
   ],
 }

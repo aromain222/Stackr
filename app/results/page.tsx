@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle2, Layers, RotateCcw } from 'lucide-react'
+import { CheckCircle2, ExternalLink, Layers, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -277,11 +277,18 @@ function ComparisonTable({ rows }: { rows: ComparisonRow[] }) {
 function AlternativeCard({
   alt,
   color,
+  category,
+  isFirst,
 }: {
   alt: AlternativeRecommendation
   color: string
+  category: keyof typeof CATEGORY_META
+  isFirst: boolean
 }) {
   const inst = INSTITUTIONS[alt.institution]
+  const actionUrl = category === 'credit' ? inst.applyUrl : inst.openAccountUrl
+  const actionLabel = category === 'credit' ? 'Apply Now' : 'Open Account'
+
   return (
     <div className="rounded-xl border border-[#1C2030] bg-[#0E1018] p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -312,6 +319,19 @@ function AlternativeCard({
           {alt.whenItWins}
         </p>
       </div>
+      {isFirst && actionUrl && (
+        <div className="mt-3 pt-3 border-t border-[#1C2030] flex items-center gap-3">
+          <a
+            href={actionUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-[#4A5166] hover:text-[#7C8599] transition-colors duration-150"
+          >
+            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+            {actionLabel}
+          </a>
+        </div>
+      )}
     </div>
   )
 }
@@ -401,6 +421,29 @@ function RecommendationCard({
           </div>
         </div>
 
+        {/* Action button */}
+        {(category === 'credit' ? inst.applyUrl : inst.openAccountUrl) && (
+          <div className="mt-5">
+            <a
+              href={(category === 'credit' ? inst.applyUrl : inst.openAccountUrl)!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-150"
+              style={{
+                backgroundColor: `${meta.color}12`,
+                border: `1px solid ${meta.color}30`,
+                color: meta.color,
+              }}
+            >
+              <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+              {category === 'credit' ? 'Apply Now' : 'Open Account'}
+            </a>
+            <p className="text-xs text-[#4A5166] mt-2">
+              You&apos;ll be redirected to the provider&apos;s official site
+            </p>
+          </div>
+        )}
+
         {/* Contextual support layer */}
         <div className="mt-5 pt-5 border-t border-[#1C2030] space-y-2.5">
           <p className="text-xs text-[#4A5166] leading-relaxed">
@@ -438,8 +481,14 @@ function RecommendationCard({
           <div className="mt-5 pt-5 border-t border-[#1C2030]">
             <p className="card-label text-[#4A5166] mb-3">Alternatives</p>
             <div className="space-y-2">
-              {alternatives.map((alt) => (
-                <AlternativeCard key={`${alt.institution}-${alt.product}`} alt={alt} color={meta.color} />
+              {alternatives.map((alt, idx) => (
+                <AlternativeCard
+                  key={`${alt.institution}-${alt.product}`}
+                  alt={alt}
+                  color={meta.color}
+                  category={category}
+                  isFirst={idx === 0}
+                />
               ))}
             </div>
           </div>
