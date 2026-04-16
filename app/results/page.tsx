@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { CheckCircle2, ExternalLink, Layers, RotateCcw } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CheckCircle2, ChevronDown, ExternalLink, Layers, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -165,17 +165,26 @@ function GeneratingScreen() {
   )
 }
 
-// ─── Stack map row ─────────────────────────────────────────────────────────────
+// ─── Stack map row (expandable) ────────────────────────────────────────────────
 
 function StackMapRow({
   category,
   rec,
+  support,
+  comparisons,
+  alternatives,
   index,
+  educationTopicId,
 }: {
   category: keyof typeof CATEGORY_META
   rec: Recommendation
+  support: SupportBlock
+  comparisons: ComparisonRow[]
+  alternatives: AlternativeRecommendation[]
   index: number
+  educationTopicId?: string
 }) {
+  const [expanded, setExpanded] = useState(false)
   const meta = CATEGORY_META[category]
   const inst = INSTITUTIONS[rec.institution]
 
@@ -184,28 +193,150 @@ function StackMapRow({
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="flex items-center gap-4 rounded-xl border border-[#1C2030] bg-[#0E1018] px-5 py-4 hover:border-[#2D3247] transition-colors duration-200"
+      className={`rounded-xl border bg-[#0E1018] overflow-hidden transition-colors duration-200 ${expanded ? 'border-[#2D3247]' : 'border-[#1C2030]'}`}
     >
-      <div
-        className="w-0.5 h-8 rounded-full flex-shrink-0"
-        style={{ backgroundColor: meta.color }}
-      />
-      <span
-        className="text-xs font-semibold uppercase tracking-widest w-14 flex-shrink-0"
-        style={{ color: meta.color }}
+      {/* Row header — clickable */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#141720] transition-colors duration-200"
       >
-        {meta.label}
-      </span>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#F0F2F8] truncate">{rec.product}</p>
-        <p className="text-xs text-[#7C8599] mt-0.5">{rec.headline}</p>
-      </div>
-      <span
-        className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0"
-        style={{ backgroundColor: meta.dimColor, color: meta.color }}
-      >
-        {inst.name}
-      </span>
+        <div
+          className="w-0.5 h-8 rounded-full flex-shrink-0"
+          style={{ backgroundColor: meta.color }}
+        />
+        <span
+          className="text-xs font-semibold uppercase tracking-widest w-14 flex-shrink-0"
+          style={{ color: meta.color }}
+        >
+          {meta.label}
+        </span>
+        <div className="flex-1 min-w-0 text-left">
+          <p className="text-sm font-medium text-[#F0F2F8] truncate">{rec.product}</p>
+          <p className="text-xs text-[#7C8599] mt-0.5">{rec.headline}</p>
+        </div>
+        <span
+          className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0"
+          style={{ backgroundColor: meta.dimColor, color: meta.color }}
+        >
+          {inst.name}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-[#4A5166] flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Expanded content */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6 border-t border-[#1C2030]">
+              <div className="space-y-4 pt-5">
+                <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
+                  <p className="card-label text-[#5B8BF5] mb-2">Why this one</p>
+                  <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.why}</p>
+                </div>
+
+                {comparisons.length > 0 && <ComparisonTable rows={comparisons} />}
+
+                <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
+                  <p className="card-label text-[#7C8599] mb-2">Why not the others</p>
+                  <p className="text-sm text-[#7C8599] leading-relaxed">{rec.whyNotAlternatives}</p>
+                </div>
+
+                <div
+                  className="rounded-xl border p-4"
+                  style={{ backgroundColor: `${meta.color}0D`, borderColor: `${meta.color}30` }}
+                >
+                  <p className="card-label mb-2" style={{ color: meta.color }}>Focus now</p>
+                  <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.focusNow}</p>
+                </div>
+              </div>
+
+              {/* Action button */}
+              {(category === 'credit' ? inst.applyUrl : inst.openAccountUrl) && (
+                <div className="mt-5">
+                  <a
+                    href={(category === 'credit' ? inst.applyUrl : inst.openAccountUrl)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-150"
+                    style={{
+                      backgroundColor: `${meta.color}12`,
+                      border: `1px solid ${meta.color}30`,
+                      color: meta.color,
+                    }}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                    {category === 'credit' ? 'Apply Now' : 'Open Account'}
+                  </a>
+                  <p className="text-xs text-[#4A5166] mt-2">
+                    You&apos;ll be redirected to the provider&apos;s official site
+                  </p>
+                </div>
+              )}
+
+              {/* Support layer */}
+              <div className="mt-5 pt-5 border-t border-[#1C2030] space-y-2.5">
+                <p className="text-xs text-[#4A5166] leading-relaxed">
+                  <span className="font-medium">Why this category — </span>
+                  {support.categoryMatter}
+                </p>
+                <p className="text-xs text-[#4A5166] leading-relaxed">
+                  <span className="font-medium">Why this fits now — </span>
+                  {support.fitNow}
+                </p>
+                <p className="text-xs text-[#4A5166] leading-relaxed">
+                  <span className="font-medium">Watch out for — </span>
+                  {support.watchOut}
+                </p>
+              </div>
+
+              {/* Education trigger */}
+              {educationTopicId && (
+                <div className="mt-4 pt-4 border-t border-[#1C2030]">
+                  <EducationTrigger
+                    topicId={educationTopicId}
+                    label={
+                      category === 'savings'
+                        ? 'What is APY?'
+                        : category === 'credit'
+                        ? 'What builds credit?'
+                        : category === 'investing'
+                        ? 'What is compounding?'
+                        : 'Learn more'
+                    }
+                  />
+                </div>
+              )}
+
+              {/* Alternatives */}
+              {alternatives.length > 0 && (
+                <div className="mt-5 pt-5 border-t border-[#1C2030]">
+                  <p className="card-label text-[#4A5166] mb-3">Alternatives</p>
+                  <div className="space-y-2">
+                    {alternatives.map((alt, idx) => (
+                      <AlternativeCard
+                        key={`${alt.institution}-${alt.product}`}
+                        alt={alt}
+                        color={meta.color}
+                        category={category}
+                        isFirst={idx === 0}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -333,168 +464,6 @@ function AlternativeCard({
         </div>
       )}
     </div>
-  )
-}
-
-// ─── Recommendation card ───────────────────────────────────────────────────────
-
-function RecommendationCard({
-  category,
-  rec,
-  support,
-  comparisons,
-  alternatives,
-  index,
-  educationTopicId,
-}: {
-  category: keyof typeof CATEGORY_META
-  rec: Recommendation
-  support: SupportBlock
-  comparisons: ComparisonRow[]
-  alternatives: AlternativeRecommendation[]
-  index: number
-  educationTopicId?: string
-}) {
-  const meta = CATEGORY_META[category]
-  const inst = INSTITUTIONS[rec.institution]
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-2xl border border-[#1C2030] bg-[#0E1018] overflow-hidden"
-    >
-      {/* Card header accent */}
-      <div className="h-0.5 w-full" style={{ backgroundColor: meta.color }} />
-
-      <div className="p-6">
-        {/* Meta row */}
-        <div className="flex items-center justify-between mb-4">
-          <span
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: meta.color }}
-          >
-            {meta.label}
-          </span>
-          <span
-            className="text-xs font-medium px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: meta.dimColor, color: meta.color }}
-          >
-            {inst.name}
-          </span>
-        </div>
-
-        {/* Product name */}
-        <h3 className="text-lg font-bold text-[#F0F2F8] mb-1">{rec.product}</h3>
-        <p className="text-sm text-[#7C8599] mb-6 leading-relaxed">{rec.headline}</p>
-
-        {/* Why this fits */}
-        <div className="space-y-4">
-          <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
-            <p className="card-label text-[#5B8BF5] mb-2">
-              Why this one
-            </p>
-            <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.why}</p>
-          </div>
-
-          {comparisons.length > 0 && <ComparisonTable rows={comparisons} />}
-
-          <div className="rounded-xl bg-[#141720] border border-[#1C2030] p-4">
-            <p className="card-label text-[#7C8599] mb-2">
-              Why not the others
-            </p>
-            <p className="text-sm text-[#7C8599] leading-relaxed">{rec.whyNotAlternatives}</p>
-          </div>
-
-          <div
-            className="rounded-xl border p-4"
-            style={{ backgroundColor: `${meta.color}0D`, borderColor: `${meta.color}30` }}
-          >
-            <p
-              className="card-label mb-2"
-              style={{ color: meta.color }}
-            >
-              Focus now
-            </p>
-            <p className="text-sm text-[#D0D5E8] leading-relaxed">{rec.focusNow}</p>
-          </div>
-        </div>
-
-        {/* Action button */}
-        {(category === 'credit' ? inst.applyUrl : inst.openAccountUrl) && (
-          <div className="mt-5">
-            <a
-              href={(category === 'credit' ? inst.applyUrl : inst.openAccountUrl)!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-150"
-              style={{
-                backgroundColor: `${meta.color}12`,
-                border: `1px solid ${meta.color}30`,
-                color: meta.color,
-              }}
-            >
-              <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
-              {category === 'credit' ? 'Apply Now' : 'Open Account'}
-            </a>
-            <p className="text-xs text-[#4A5166] mt-2">
-              You&apos;ll be redirected to the provider&apos;s official site
-            </p>
-          </div>
-        )}
-
-        {/* Contextual support layer */}
-        <div className="mt-5 pt-5 border-t border-[#1C2030] space-y-2.5">
-          <p className="text-xs text-[#4A5166] leading-relaxed">
-            <span className="font-medium">Why this category — </span>
-            {support.categoryMatter}
-          </p>
-          <p className="text-xs text-[#4A5166] leading-relaxed">
-            <span className="font-medium">Why this fits now — </span>
-            {support.fitNow}
-          </p>
-          <p className="text-xs text-[#4A5166] leading-relaxed">
-            <span className="font-medium">Watch out for — </span>
-            {support.watchOut}
-          </p>
-        </div>
-
-        {educationTopicId && (
-          <div className="mt-4 pt-4 border-t border-[#1C2030]">
-            <EducationTrigger
-              topicId={educationTopicId}
-              label={
-                category === 'savings'
-                  ? 'What is APY?'
-                  : category === 'credit'
-                  ? 'What builds credit?'
-                  : category === 'investing'
-                  ? 'What is compounding?'
-                  : 'Learn more'
-              }
-            />
-          </div>
-        )}
-
-        {alternatives.length > 0 && (
-          <div className="mt-5 pt-5 border-t border-[#1C2030]">
-            <p className="card-label text-[#4A5166] mb-3">Alternatives</p>
-            <div className="space-y-2">
-              {alternatives.map((alt, idx) => (
-                <AlternativeCard
-                  key={`${alt.institution}-${alt.product}`}
-                  alt={alt}
-                  color={meta.color}
-                  category={category}
-                  isFirst={idx === 0}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
   )
 }
 
@@ -683,35 +652,15 @@ export default function ResultsPage() {
             Your Stack
           </p>
           <div className="space-y-2">
-            <StackMapRow category="checking" rec={stack.checking.primary} index={0} />
-            <StackMapRow category="savings" rec={stack.savings.primary} index={1} />
-            <StackMapRow category="credit" rec={stack.credit.primary} index={2} />
-            <StackMapRow category="investing" rec={stack.investingRecommendation} index={3} />
+            <StackMapRow category="checking" rec={stack.checking.primary} support={stack.support.checking} comparisons={stack.comparisons.checking} alternatives={stack.checking.alternatives} index={0} />
+            <StackMapRow category="savings" rec={stack.savings.primary} support={stack.support.savings} comparisons={stack.comparisons.savings} alternatives={stack.savings.alternatives} index={1} educationTopicId="apy" />
+            <StackMapRow category="credit" rec={stack.credit.primary} support={stack.support.credit} comparisons={stack.comparisons.credit} alternatives={stack.credit.alternatives} index={2} educationTopicId="credit_score" />
+            <StackMapRow category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} alternatives={[]} index={3} educationTopicId="compounding" />
           </div>
         </motion.section>
 
         {/* ── Section 3: Now vs Later ── */}
         <NowLaterSection planning={stack.planningLayer} />
-
-        {/* Divider */}
-        <div className="border-t border-[#1C2030]" />
-
-        {/* ── Section 4: Recommendation Cards ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <p className="section-label mb-5">
-            The full breakdown
-          </p>
-          <div className="space-y-4">
-            <RecommendationCard category="checking" rec={stack.checking.primary} support={stack.support.checking} comparisons={stack.comparisons.checking} alternatives={stack.checking.alternatives} index={0} />
-            <RecommendationCard category="savings" rec={stack.savings.primary} support={stack.support.savings} comparisons={stack.comparisons.savings} alternatives={stack.savings.alternatives} index={1} educationTopicId="apy" />
-            <RecommendationCard category="credit" rec={stack.credit.primary} support={stack.support.credit} comparisons={stack.comparisons.credit} alternatives={stack.credit.alternatives} index={2} educationTopicId="credit_score" />
-            <RecommendationCard category="investing" rec={stack.investingRecommendation} support={stack.support.investing} comparisons={[]} alternatives={[]} index={3} educationTopicId="compounding" />
-          </div>
-        </motion.section>
 
         {/* Divider */}
         <div className="border-t border-[#1C2030]" />
