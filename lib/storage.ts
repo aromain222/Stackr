@@ -38,11 +38,21 @@ const VALID_VALUES = {
   checkingPreference: ['no_fees', 'high_yield', 'rewards', 'mobile_app', 'branch_access'],
 } as const
 
+// Optional v2 fields: if present must be valid; absent is fine (backward compat with 8-question profiles)
+const VALID_OPTIONAL = {
+  paymentFrequency: ['direct_deposit', 'irregular_cash', 'business_income', 'no_income'],
+  moneyStyle: ['set_and_forget', 'hands_on', 'simple_and_clear', 'maximize_everything'],
+} as const
+
 function isValidAnswers(data: unknown): data is UserAnswers {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return false
   const d = data as Record<string, unknown>
-  return (Object.keys(VALID_VALUES) as (keyof typeof VALID_VALUES)[]).every(
+  const requiredOk = (Object.keys(VALID_VALUES) as (keyof typeof VALID_VALUES)[]).every(
     (key) => (VALID_VALUES[key] as readonly string[]).includes(d[key] as string)
+  )
+  if (!requiredOk) return false
+  return (Object.keys(VALID_OPTIONAL) as (keyof typeof VALID_OPTIONAL)[]).every(
+    (key) => d[key] === undefined || (VALID_OPTIONAL[key] as readonly string[]).includes(d[key] as string)
   )
 }
 

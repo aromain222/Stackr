@@ -119,9 +119,23 @@ export function getCreditRecommendation(
     case 'emerging_optimizer': {
       // Chase for hybrid/wealth archetypes (ecosystem matters); Discover for digital/rewards
       // (higher approval tolerance, strong first-year Cashback Match).
-      // Bug fix: why/whyNot/focusNow were previously always Chase text even when product was Discover.
+      // simple_and_clear / set_and_forget → Citi Double Cash (flat 2%, no categories, no activation).
       const useChase =
         archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter'
+      const wantsSimple =
+        answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
+      if (wantsSimple) {
+        return {
+          institution: 'citi',
+          product: 'Citi Double Cash® Card',
+          headline: '2% flat on everything — no categories, no activation, no thinking',
+          why: `Your payment history puts real rewards cards within reach. Citi Double Cash earns 2% on every purchase — 1% when you buy, 1% when you pay — with no annual fee, no rotating categories to activate, and no quarterly management. With ${incomeCtx}, a flat-rate card you'll actually use beats a higher-ceiling card you have to manage.`,
+          whyNotAlternatives:
+            "Discover it Cash Back earns up to 5% but requires quarterly activation and category tracking. Chase Freedom Unlimited earns 1.5% base and builds toward an ecosystem — worth it if you want that complexity later. Citi Double Cash delivers the highest flat rate with zero overhead.",
+          focusNow:
+            'Apply, set up full-balance autopay before the first statement closes, and use it for everything. The 2% rate applies automatically — no activation, no tracking required.',
+        }
+      }
       return {
         institution: useChase ? 'chase' : 'discover',
         product: useChase ? 'Chase Freedom Unlimited®' : 'Discover it® Cash Back',
@@ -175,7 +189,22 @@ export function getCreditRecommendation(
       }
 
       // Branch 3: traditional_hybrid at 700+ → Chase Freedom Flex (5% categories, organized user)
+      //           or Citi Double Cash if they prefer simple/set-and-forget
       if (archetype === 'traditional_hybrid') {
+        const wantsSimple =
+          answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
+        if (wantsSimple) {
+          return {
+            institution: 'citi',
+            product: 'Citi Double Cash® Card',
+            headline: '2% flat on everything — no categories, no activation, no quarterly management',
+            why: `Your 700+ score qualifies you for top no-fee cards. With your preference for straightforward money management, Citi Double Cash delivers 2% on every purchase — 1% when you buy, 1% when you pay — with zero overhead. No activation calendar, no category rotations, no thinking. With ${incomeCtx}, that consistency is worth more than a higher ceiling that requires active management.`,
+            whyNotAlternatives:
+              "Chase Freedom Flex earns 5% on rotating categories but requires quarterly activation and category tracking. Chase Freedom Unlimited earns 1.5% base and builds toward an ecosystem — worth it only if you want to manage a multi-card strategy. Citi Double Cash wins for users who want simplicity without sacrificing a competitive rate.",
+            focusNow:
+              'Apply, set up full-balance autopay immediately, and use it for all spending. The 2% applies automatically with no setup — set it and move on.',
+          }
+        }
         return {
           institution: 'chase',
           product: 'Chase Freedom Flex®',
@@ -187,13 +216,30 @@ export function getCreditRecommendation(
       }
 
       // Branch 4: fallback — strong credit but not optimally placed (digital_optimizer, foundation_builder)
-      return {
-        institution: 'chase',
-        product: 'Chase Freedom Unlimited®',
-        headline: 'Strong credit opens the door — build toward a full rewards stack',
-        why: `A 700+ score puts Chase Freedom Unlimited well within reach. It earns 1.5% on all purchases, 3% on dining, and 5% on travel booked through Chase — no annual fee. More importantly, it anchors the Chase ecosystem: add a Sapphire card in 6–12 months and Freedom Unlimited points become transferable to airlines and hotels at 2.25¢+ each.`,
-        whyNotAlternatives: `Citi Double Cash earns 2% flat but doesn't build toward a transferable points currency. Amex cards charge annual fees that require high spend to justify. Chase Freedom Unlimited provides optionality — it upgrades in value when you add a Sapphire, without any cost today.`,
-        focusNow: `Apply, set up full-balance autopay immediately, and use for all spending. Begin tracking your Chase Ultimate Rewards balance — you're building toward a Chase Sapphire Preferred as your next card, which unlocks the full travel value of every point earned on Freedom Unlimited.`,
+      //           or simple/set-and-forget preference → Citi Double Cash
+      {
+        const wantsSimple =
+          answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
+        if (wantsSimple) {
+          return {
+            institution: 'citi',
+            product: 'Citi Double Cash® Card',
+            headline: '2% flat on everything — no categories, no activation, no thinking',
+            why: `Your 700+ score qualifies you for top no-fee rewards cards. Citi Double Cash earns 2% on every purchase — 1% when you buy, 1% when you pay — with no annual fee and zero complexity. No quarterly categories to activate, no ecosystems to manage. With ${incomeCtx}, a flat-rate card that runs on autopilot beats a higher-ceiling card that requires regular attention.`,
+            whyNotAlternatives:
+              "Chase Freedom Unlimited earns 1.5% base and builds toward Ultimate Rewards — worth it if you plan to add a Sapphire card later. Discover it earns 5% rotating but requires quarterly activation. Citi Double Cash delivers the highest flat rate with the simplest experience.",
+            focusNow:
+              'Apply, set up full-balance autopay before the first statement closes, and use it for all spending. The 2% rate is fully automatic — no setup, no activation required.',
+          }
+        }
+        return {
+          institution: 'chase',
+          product: 'Chase Freedom Unlimited®',
+          headline: 'Strong credit opens the door — build toward a full rewards stack',
+          why: `A 700+ score puts Chase Freedom Unlimited well within reach. It earns 1.5% on all purchases, 3% on dining, and 5% on travel booked through Chase — no annual fee. More importantly, it anchors the Chase ecosystem: add a Sapphire card in 6–12 months and Freedom Unlimited points become transferable to airlines and hotels at 2.25¢+ each.`,
+          whyNotAlternatives: `Citi Double Cash earns 2% flat but doesn't build toward a transferable points currency. Amex cards charge annual fees that require high spend to justify. Chase Freedom Unlimited provides optionality — it upgrades in value when you add a Sapphire, without any cost today.`,
+          focusNow: `Apply, set up full-balance autopay immediately, and use for all spending. Begin tracking your Chase Ultimate Rewards balance — you're building toward a Chase Sapphire Preferred as your next card, which unlocks the full travel value of every point earned on Freedom Unlimited.`,
+        }
       }
 
     default:

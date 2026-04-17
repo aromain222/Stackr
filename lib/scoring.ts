@@ -72,6 +72,20 @@ export const SCORING_CONFIG: ScoringConfig = {
     mobile_app: { digital_optimizer: 3 },
     branch_access: { traditional_hybrid: 3 },
   },
+
+  paymentFrequency: {
+    direct_deposit:  { digital_optimizer: 1, early_wealth_starter: 1 },
+    irregular_cash:  { foundation_builder: 1, digital_optimizer: 1 },
+    business_income: { digital_optimizer: 2, rewards_builder: 1 },
+    no_income:       { foundation_builder: 2 },
+  },
+
+  moneyStyle: {
+    set_and_forget:      { early_wealth_starter: 2, digital_optimizer: 1 },
+    hands_on:            { rewards_builder: 2, digital_optimizer: 1 },
+    simple_and_clear:    { traditional_hybrid: 2, foundation_builder: 1 },
+    maximize_everything: { rewards_builder: 3, digital_optimizer: 1 },
+  },
 }
 
 // ─── Zero-initialized scores ────────────────────────────────────────────────────
@@ -94,12 +108,13 @@ export function calculateArchetypeScores(answers: UserAnswers): ArchetypeScores 
   const scores = zeroScores()
 
   for (const [questionKey, answerMap] of Object.entries(SCORING_CONFIG)) {
-    const answerValue = answers[questionKey as keyof UserAnswers]
+    const answerValue = answers[questionKey as keyof UserAnswers] as string | undefined
+    if (!answerValue) continue
     const deltas = answerMap[answerValue]
     if (!deltas) continue
 
-    for (const [archetypeId, delta] of Object.entries(deltas)) {
-      scores[archetypeId as ArchetypeId] += delta
+    for (const [archetypeId, delta] of Object.entries(deltas) as [ArchetypeId, number][]) {
+      scores[archetypeId] += delta
     }
   }
 

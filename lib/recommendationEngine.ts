@@ -91,7 +91,21 @@ function getCheckingRecommendation(archetype: ArchetypeId, answers: UserAnswers)
           'Open online today — takes 5 minutes, no minimum deposit required. Set up direct deposit from your employer to enable overdraft protection and early paycheck access.',
       }
 
-    case 'digital_optimizer':
+    case 'digital_optimizer': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      const wantsSimple = answers.moneyStyle === 'simple_and_clear'
+      if (noDD || wantsSimple) {
+        return {
+          institution: 'capital_one',
+          product: 'Capital One 360 Checking',
+          headline: 'No fees, no conditions — 4.25% savings APY with no direct deposit required',
+          why: `You prefer ${banking}${noDD ? ' but your income doesn\'t flow through standard direct deposit' : ' and prefer keeping banking simple'}. Capital One 360 earns 4.25% APY on savings with zero conditions — no direct deposit required, no minimum balance. SoFi's 4.60% rate only activates with direct deposit; without it you'd earn 1.20%, which is worse than Capital One's unconditional rate.`,
+          whyNotAlternatives:
+            "SoFi's 4.60% savings rate requires direct deposit — without it, you earn 1.20%, making it the worse option here. Ally earns 4.20% with no conditions but has no branch or café footprint. Capital One's ~500 branch-and-café locations add occasional in-person flexibility at zero cost.",
+          focusNow:
+            'Open online in 5 minutes — no minimum deposit. The 4.25% savings rate applies from day one with no setup requirements. Link Capital One 360 Performance Savings to the same account to keep everything in one place.',
+        }
+      }
       return {
         institution: 'sofi',
         product: 'SoFi Checking & Savings',
@@ -102,6 +116,7 @@ function getCheckingRecommendation(archetype: ArchetypeId, answers: UserAnswers)
         focusNow:
           'Open SoFi and enable direct deposit to unlock the 4.60% savings APY. Without direct deposit, the savings rate drops to 1.20% — the difference on $5,000 is $170/year.',
       }
+    }
 
     case 'traditional_hybrid':
       return {
@@ -127,17 +142,44 @@ function getCheckingRecommendation(archetype: ArchetypeId, answers: UserAnswers)
           'Open and set as your primary everyday spending account. Use your rewards credit card for larger purchases and Discover Cashback Debit for everyday spend where credit isn\'t accepted.',
       }
 
-    case 'early_wealth_starter':
+    case 'early_wealth_starter': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      const prefersIntegrated = answers.retirement === '401k_with_match' || answers.retirement === '401k_no_match'
+      if (prefersIntegrated && !noDD) {
+        return {
+          institution: 'schwab',
+          product: 'Schwab Investor Checking',
+          headline: 'Checking + brokerage under one login, unlimited ATM rebates worldwide',
+          why: `With ${income} and ${EF_LABEL[answers.emergencyFund]}, your retirement accounts are already active — centralizing daily banking at Schwab puts your checking and investments in one dashboard. Unlimited worldwide ATM fee rebates mean zero cash-access friction, and the $0-fee account integrates directly with Schwab brokerage and your Roth IRA.`,
+          whyNotAlternatives:
+            "SoFi earns more on idle cash (4.60% vs Schwab's 0.45% with DD), but doesn't offer a full brokerage under the same login. Fidelity integrates similarly, but Schwab's checking is the stronger everyday banking product. If maximizing cash yield matters more than brokerage consolidation, SoFi is the right call instead.",
+          focusNow:
+            'Open Schwab Investor Checking — takes 10 minutes online, $0 minimum. Link your existing Schwab brokerage or open both simultaneously. Set up direct deposit for early paycheck access.',
+        }
+      }
+      if (noDD) {
+        return {
+          institution: 'capital_one',
+          product: 'Capital One 360 Checking',
+          headline: 'No fees, 4.25% savings APY — no direct deposit required',
+          why: `With ${income} and ${EF_LABEL[answers.emergencyFund]}, income that doesn\'t arrive as standard direct deposit means SoFi's 4.60% rate stays locked at 1.20%. Capital One 360 earns 4.25% APY on savings with zero conditions — no enrollment, no minimums — so every dollar works harder regardless of how your income arrives.`,
+          whyNotAlternatives:
+            "SoFi without direct deposit earns 1.20% on savings — materially worse than Capital One's unconditional 4.25%. Ally earns 4.20% with no conditions and is a valid alternative, but Capital One's ~500 branch-and-café footprint adds occasional in-person flexibility.",
+          focusNow:
+            'Open online in 5 minutes, no minimum deposit. Pair with Capital One 360 Performance Savings to get the 4.25% APY on your emergency fund automatically.',
+        }
+      }
       return {
         institution: 'sofi',
         product: 'SoFi Checking & Savings',
         headline: 'Your checking balance should earn — and with SoFi, it does',
         why: `With ${income} and ${EF_LABEL[answers.emergencyFund]}, optimizing every account matters. SoFi pays 0.50% APY on checking and 4.60% on savings with direct deposit — meaning the cash sitting in your account between paychecks earns real yield instead of nothing. Zero fees means zero drag on returns.`,
         whyNotAlternatives:
-          'Traditional banks pay $0 on checking and charge $12–$15/month in fees. Chase is a better choice only if branch access is important to you. At your income and stage, SoFi\'s all-in-one yield optimization is the highest-value checking option.',
+          "Traditional banks pay $0 on checking and charge $12–$15/month in fees. Chase is a better choice only if branch access is important to you. At your income and stage, SoFi's all-in-one yield optimization is the highest-value checking option.",
         focusNow:
           'Enable direct deposit to unlock the full 4.60% savings APY. Set up an auto-sweep rule to move anything above your monthly spending threshold into savings — every dollar above the buffer should be earning 4.60%.',
       }
+    }
   }
 }
 
@@ -160,17 +202,31 @@ function getSavingsRecommendation(archetype: ArchetypeId, answers: UserAnswers):
           'Open with any amount — even $1. Set up a weekly auto-transfer from your Capital One checking. Create a "Emergency Fund" bucket. Even $25/week becomes $1,300 in a year.',
       }
 
-    case 'digital_optimizer':
+    case 'digital_optimizer': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      if (noDD) {
+        return {
+          institution: 'ally',
+          product: 'Ally High-Yield Savings Account',
+          headline: '4.20% APY — no direct deposit required, no minimum balance',
+          why: `SoFi's 4.60% savings rate requires direct deposit to unlock — without it you earn 1.20%. With ${income} and income that doesn't flow through standard direct deposit, Ally earns 4.20% APY with zero conditions. No enrollment, no requirements — full rate from day one regardless of how your income arrives.`,
+          whyNotAlternatives:
+            "SoFi without direct deposit earns 1.20% — far worse than Ally's unconditional 4.20%. Capital One Performance Savings earns 4.25% and is also valid here, but Ally's Savings Buckets make it easier to track multiple savings goals when income is irregular.",
+          focusNow:
+            'Open with any amount — even $1 starts the account. Use Savings Buckets to label incoming funds: Emergency Fund, Tax Reserve, Business Buffer. The structure matters more when income is variable.',
+        }
+      }
       return {
         institution: 'sofi',
         product: 'SoFi Savings (integrated with Checking)',
         headline: '4.60% APY — the highest available when paired with direct deposit',
         why: `SoFi's checking and savings are one integrated account. With ${income} and direct deposit active, your savings earns 4.60% APY — higher than Ally, Marcus, or any traditional bank. There's no friction between spending and saving because it's one login, one app, one dashboard.`,
         whyNotAlternatives:
-          'Ally earns 4.20% — meaningfully lower than SoFi\'s 4.60% with direct deposit. Marcus is a clean savings product but doesn\'t integrate with checking. Opening a second app and a second relationship for marginally lower yield makes no sense at your optimization level.',
+          "Ally earns 4.20% — meaningfully lower than SoFi's 4.60% with direct deposit. Marcus is a clean savings product but doesn't integrate with checking. Opening a second app and a second relationship for marginally lower yield makes no sense at your optimization level.",
         focusNow:
           'Enable direct deposit — this is the unlock for the 4.60% rate. Use SoFi Vaults to tag savings by purpose: Emergency Fund, Travel, Next Investment. The structure makes it easier to grow each bucket.',
       }
+    }
 
     case 'traditional_hybrid':
       return {
@@ -196,7 +252,20 @@ function getSavingsRecommendation(archetype: ArchetypeId, answers: UserAnswers):
           'Open Amex HYSA online. Transfer your full emergency fund there today — every month you delay in a low-yield account is real money forfeited. Transfers to/from external accounts settle in 1–3 business days.',
       }
 
-    case 'early_wealth_starter':
+    case 'early_wealth_starter': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      if (noDD) {
+        return {
+          institution: 'ally',
+          product: 'Ally High-Yield Savings Account',
+          headline: '4.20% APY with no conditions — your emergency fund earns from day one',
+          why: `With ${ef} and irregular income, Ally's 4.20% APY with zero conditions is the right foundation. SoFi's 4.60% requires direct deposit — without it you earn 1.20%. Ally earns the full rate immediately with no requirements, and Savings Buckets make it easy to separate your emergency fund, tax reserve, and investing buffer when income is variable.`,
+          whyNotAlternatives:
+            "SoFi without direct deposit earns 1.20% — far worse than Ally's 4.20%. Capital One 360 Performance Savings earns 4.25% and is a valid alternative, but Ally's goal-bucketing feature is more useful for managing irregular cash flow across multiple purposes.",
+          focusNow:
+            'Open and create three Savings Buckets: Emergency Fund (3–6 months expenses), Tax Reserve (if self-employed: ~25% of income), Investing Buffer (excess above EF target flows to Roth IRA). The structure makes irregular income manageable.',
+        }
+      }
       return {
         institution: 'sofi',
         product: 'SoFi Savings (integrated with Checking)',
@@ -207,6 +276,7 @@ function getSavingsRecommendation(archetype: ArchetypeId, answers: UserAnswers):
         focusNow:
           'Enable direct deposit to unlock the full 4.60% savings APY. Set a target savings balance: 3–6 months of monthly expenses. Every dollar above that threshold should flow to your Roth IRA or taxable brokerage at Fidelity — savings rate is not investing rate.',
       }
+    }
   }
 }
 
@@ -571,24 +641,47 @@ function getCheckingAlternatives(
       }
       break
 
-    case 'digital_optimizer':
-      alts.push({
-        institution: 'capital_one',
-        product: 'Capital One 360 Checking',
-        headline: 'Zero fees, zero conditions, 4.25% savings APY',
-        tradeoff: '4.25% savings vs SoFi\'s 4.60% — the yield gap is ~$20/year on $5,000',
-        whenItWins: 'If you\'re not ready to switch direct deposit to a new bank, Capital One earns well with no requirements',
-        isUpgradePath: false,
-      })
-      alts.push({
-        institution: 'ally',
-        product: 'Ally Interest Checking',
-        headline: '4.20% savings + 0.25% checking, purpose-built for savers',
-        tradeoff: 'Slightly lower APY than SoFi and a separate savings account vs. the integrated SoFi model',
-        whenItWins: 'If you prefer a bank purpose-built around savings tooling (Savings Buckets) over an all-in-one platform',
-        isUpgradePath: false,
-      })
+    case 'digital_optimizer': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      const wantsSimple = answers.moneyStyle === 'simple_and_clear'
+      if (noDD || wantsSimple) {
+        // Primary is Capital One — SoFi is upgrade path, Ally is no-condition alt
+        alts.push({
+          institution: 'sofi',
+          product: 'SoFi Checking & Savings',
+          headline: '4.60% savings APY — the upgrade once direct deposit is available',
+          tradeoff: 'Rate drops to 1.20% without direct deposit — the gap vs. Capital One depends entirely on DD eligibility',
+          whenItWins: 'Once your income reliably flows through direct deposit — SoFi\'s rate advantage is worth the switch',
+          isUpgradePath: true,
+        })
+        alts.push({
+          institution: 'ally',
+          product: 'Ally Interest Checking',
+          headline: '4.20% savings + 0.25% checking, no-conditions savings-first bank',
+          tradeoff: 'Slightly lower savings APY than Capital One (4.20% vs 4.25%) and no branch access',
+          whenItWins: 'If you prefer a bank purpose-built around savings tooling (Savings Buckets) with no minimum requirements',
+          isUpgradePath: false,
+        })
+      } else {
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One 360 Checking',
+          headline: 'Zero fees, zero conditions, 4.25% savings APY',
+          tradeoff: '4.25% savings vs SoFi\'s 4.60% — the yield gap is ~$20/year on $5,000',
+          whenItWins: 'If you\'re not ready to switch direct deposit to a new bank, Capital One earns well with no requirements',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'ally',
+          product: 'Ally Interest Checking',
+          headline: '4.20% savings + 0.25% checking, purpose-built for savers',
+          tradeoff: 'Slightly lower APY than SoFi and a separate savings account vs. the integrated SoFi model',
+          whenItWins: 'If you prefer a bank purpose-built around savings tooling (Savings Buckets) over an all-in-one platform',
+          isUpgradePath: false,
+        })
+      }
       break
+    }
 
     case 'traditional_hybrid':
       alts.push({
@@ -628,24 +721,66 @@ function getCheckingAlternatives(
       })
       break
 
-    case 'early_wealth_starter':
-      alts.push({
-        institution: 'schwab',
-        product: 'Schwab Investor Checking',
-        headline: 'Unlimited worldwide ATM rebates + brokerage in one login',
-        tradeoff: 'Lower savings yield than SoFi — Schwab shines on investing integration and travel, not APY',
-        whenItWins: 'If you travel frequently or want your brokerage and checking under a single Schwab login',
-        isUpgradePath: false,
-      })
-      alts.push({
-        institution: 'fidelity',
-        product: 'Fidelity Cash Management Account',
-        headline: 'Checking + Roth IRA + brokerage in one login',
-        tradeoff: 'Lower cash yield than SoFi — optimized for investment integration, not maximum APY',
-        whenItWins: 'If having your daily cash alongside your Roth IRA and brokerage in one place matters more than maximizing APY',
-        isUpgradePath: false,
-      })
+    case 'early_wealth_starter': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      const prefersIntegrated = answers.retirement === '401k_with_match' || answers.retirement === '401k_no_match'
+      if (prefersIntegrated && !noDD) {
+        // Primary is Schwab — Fidelity is similar integration alt, SoFi is high-yield alt
+        alts.push({
+          institution: 'fidelity',
+          product: 'Fidelity Cash Management Account',
+          headline: 'Checking + Roth IRA + brokerage under one Fidelity login',
+          tradeoff: 'Lower everyday cash yield than SoFi — optimized for investment consolidation, not maximum APY',
+          whenItWins: 'If your Roth IRA and brokerage are already at Fidelity — one login for everything simplifies tracking',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'sofi',
+          product: 'SoFi Checking & Savings',
+          headline: '4.60% savings + 0.50% checking — highest yield option',
+          tradeoff: 'No brokerage integration — optimizes for cash yield, not investment consolidation',
+          whenItWins: 'If maximizing yield on idle cash matters more than having checking and brokerage under one roof',
+          isUpgradePath: false,
+        })
+      } else if (noDD) {
+        // Primary is Capital One
+        alts.push({
+          institution: 'ally',
+          product: 'Ally Interest Checking',
+          headline: '4.20% savings + 0.25% checking, Savings Buckets for goal tracking',
+          tradeoff: 'Slightly lower savings APY than Capital One (4.20% vs 4.25%) — no branch access',
+          whenItWins: 'If goal-labeled savings buckets matter more than squeezing out the last 0.05% APY',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'sofi',
+          product: 'SoFi Checking & Savings',
+          headline: '4.60% savings APY — the upgrade once direct deposit is available',
+          tradeoff: 'Rate drops to 1.20% without direct deposit — only worth switching once DD is reliably set up',
+          whenItWins: 'Once your primary income flows through direct deposit — 4.60% is the best available rate',
+          isUpgradePath: true,
+        })
+      } else {
+        // Default: Primary is SoFi
+        alts.push({
+          institution: 'schwab',
+          product: 'Schwab Investor Checking',
+          headline: 'Unlimited worldwide ATM rebates + brokerage in one login',
+          tradeoff: 'Lower savings yield than SoFi — Schwab shines on investing integration and travel, not APY',
+          whenItWins: 'If you travel frequently or want your brokerage and checking under a single Schwab login',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'fidelity',
+          product: 'Fidelity Cash Management Account',
+          headline: 'Checking + Roth IRA + brokerage in one login',
+          tradeoff: 'Lower cash yield than SoFi — optimized for investment integration, not maximum APY',
+          whenItWins: 'If having your daily cash alongside your Roth IRA and brokerage in one place matters more than maximizing APY',
+          isUpgradePath: false,
+        })
+      }
       break
+    }
   }
 
   // Cap at 2 — secondary archetype ranking already baked into order above
@@ -682,24 +817,46 @@ function getSavingsAlternatives(
       })
       break
 
-    case 'digital_optimizer':
-      alts.push({
-        institution: 'ally',
-        product: 'Ally Online Savings',
-        headline: '4.20% APY — no conditions, Savings Buckets for goal tracking',
-        tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
-        whenItWins: 'If you prefer a dedicated savings bank with named goal buckets and no strings attached to the rate',
-        isUpgradePath: false,
-      })
-      alts.push({
-        institution: 'capital_one',
-        product: 'Capital One 360 Performance Savings',
-        headline: '4.25% APY — no conditions, between Ally and SoFi',
-        tradeoff: 'Lower yield than SoFi with DD, no integrated checking like SoFi',
-        whenItWins: 'If you want competitive yield without switching your direct deposit away from your current bank',
-        isUpgradePath: false,
-      })
+    case 'digital_optimizer': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      if (noDD) {
+        // Primary is Ally — Capital One is marginal-rate alt, SoFi is upgrade path
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One 360 Performance Savings',
+          headline: '4.25% APY — no conditions, marginally higher than Ally',
+          tradeoff: '4.25% vs Ally\'s 4.20% — same zero-condition structure, no Savings Buckets feature',
+          whenItWins: 'If you already use Capital One for checking and want savings at the same bank',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'sofi',
+          product: 'SoFi Savings (integrated with Checking)',
+          headline: '4.60% APY — the best rate, but only with direct deposit active',
+          tradeoff: 'Rate drops to 1.20% without direct deposit — only worth it once DD is reliably set up',
+          whenItWins: 'Once your income flows through direct deposit consistently — 4.60% vs 4.20% is worth the switch',
+          isUpgradePath: true,
+        })
+      } else {
+        alts.push({
+          institution: 'ally',
+          product: 'Ally Online Savings',
+          headline: '4.20% APY — no conditions, Savings Buckets for goal tracking',
+          tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
+          whenItWins: 'If you prefer a dedicated savings bank with named goal buckets and no strings attached to the rate',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One 360 Performance Savings',
+          headline: '4.25% APY — no conditions, between Ally and SoFi',
+          tradeoff: 'Lower yield than SoFi with DD, no integrated checking like SoFi',
+          whenItWins: 'If you want competitive yield without switching your direct deposit away from your current bank',
+          isUpgradePath: false,
+        })
+      }
       break
+    }
 
     case 'traditional_hybrid':
       alts.push({
@@ -739,28 +896,49 @@ function getSavingsAlternatives(
       })
       break
 
-    case 'early_wealth_starter':
-      alts.push({
-        institution: 'ally',
-        product: 'Ally Online Savings',
-        headline: '4.20% APY — no conditions, Savings Buckets',
-        tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
-        whenItWins: 'If you prefer keeping banking and investing on separate platforms with clean separation',
-        isUpgradePath: false,
-      })
-      alts.push({
-        institution: 'amex',
-        product: 'American Express High-Yield Savings',
-        headline: '4.35% APY — no conditions, pairs with any checking account',
-        tradeoff: 'Lower yield than SoFi with DD, savings-only (no checking product)',
-        whenItWins: 'If you want a standalone savings account with no conditions that pairs cleanly with any bank',
-        isUpgradePath: false,
-      })
+    case 'early_wealth_starter': {
+      const noDD = answers.paymentFrequency === 'irregular_cash' || answers.paymentFrequency === 'business_income'
+      if (noDD) {
+        // Primary is Ally
+        alts.push({
+          institution: 'capital_one',
+          product: 'Capital One 360 Performance Savings',
+          headline: '4.25% APY — no conditions, marginally higher than Ally',
+          tradeoff: '4.25% vs Ally\'s 4.20% — same zero-condition structure, no Savings Buckets feature',
+          whenItWins: 'If you already have Capital One checking and want savings at the same institution',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'sofi',
+          product: 'SoFi Savings (integrated with Checking)',
+          headline: '4.60% APY — upgrade once direct deposit is available',
+          tradeoff: 'Rate drops to 1.20% without direct deposit — not worth switching until DD is reliably set up',
+          whenItWins: 'Once your primary income flows through direct deposit — 4.60% is the best available no-fee rate',
+          isUpgradePath: true,
+        })
+      } else {
+        alts.push({
+          institution: 'ally',
+          product: 'Ally Online Savings',
+          headline: '4.20% APY — no conditions, Savings Buckets',
+          tradeoff: '4.20% vs SoFi\'s 4.60% — $20/year less on $5,000, but no direct deposit required',
+          whenItWins: 'If you prefer keeping banking and investing on separate platforms with clean separation',
+          isUpgradePath: false,
+        })
+        alts.push({
+          institution: 'amex',
+          product: 'American Express High-Yield Savings',
+          headline: '4.35% APY — no conditions, pairs with any checking account',
+          tradeoff: 'Lower yield than SoFi with DD, savings-only (no checking product)',
+          whenItWins: 'If you want a standalone savings account with no conditions that pairs cleanly with any bank',
+          isUpgradePath: false,
+        })
+      }
       break
+    }
   }
 
   void secondary
-  void answers
   return alts.slice(0, 2)
 }
 
@@ -843,42 +1021,83 @@ function getCreditAlternatives(
 
     case 'emerging_optimizer': {
       const useChase = archetype === 'traditional_hybrid' || archetype === 'early_wealth_starter'
+      const wantsSimple = answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
       if (useChase) {
-        // Primary is Chase Freedom Unlimited
-        alts.push({
-          institution: 'discover',
-          product: 'Discover it® Cash Back',
-          headline: '5% rotating categories — higher ceiling with quarterly activation',
-          tradeoff: 'Requires activating bonus categories each quarter — more work but potentially more cashback',
-          whenItWins: 'If you\'re willing to manage quarterly categories and want to maximize cashback over ecosystem breadth',
-          isUpgradePath: false,
-        })
-        alts.push({
-          institution: 'chase',
-          product: 'Chase Sapphire Preferred®',
-          headline: '3x dining, 2x travel — unlocks Chase Ultimate Rewards transfers',
-          tradeoff: '$95/year fee — points become worth 1.25–2.25¢ each for travel vs 1¢ for cash',
-          whenItWins: 'In 12–18 months once travel becomes a meaningful spend category and you want transferable points',
-          isUpgradePath: true,
-        })
+        // Primary is Chase Freedom Unlimited (or Citi if wantsSimple)
+        if (wantsSimple) {
+          // Primary is Citi Double Cash — Discover as higher-ceiling alt, Sapphire as upgrade
+          alts.push({
+            institution: 'discover',
+            product: 'Discover it® Cash Back',
+            headline: '5% rotating categories — higher ceiling if you activate quarterly',
+            tradeoff: 'Requires quarterly activation and category tracking — more work, higher peak earnings',
+            whenItWins: 'If you decide you want to optimize spend categories rather than flat simplicity',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — unlocks Chase Ultimate Rewards transfers',
+            tradeoff: '$95/year fee — points become worth 1.25–2.25¢ each for travel vs 1¢ for cash',
+            whenItWins: 'In 12–18 months once travel becomes a meaningful spend category',
+            isUpgradePath: true,
+          })
+        } else {
+          alts.push({
+            institution: 'discover',
+            product: 'Discover it® Cash Back',
+            headline: '5% rotating categories — higher ceiling with quarterly activation',
+            tradeoff: 'Requires activating bonus categories each quarter — more work but potentially more cashback',
+            whenItWins: 'If you\'re willing to manage quarterly categories and want to maximize cashback over ecosystem breadth',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining, 2x travel — unlocks Chase Ultimate Rewards transfers',
+            tradeoff: '$95/year fee — points become worth 1.25–2.25¢ each for travel vs 1¢ for cash',
+            whenItWins: 'In 12–18 months once travel becomes a meaningful spend category and you want transferable points',
+            isUpgradePath: true,
+          })
+        }
       } else {
-        // Primary is Discover it Cash Back
-        alts.push({
-          institution: 'citi',
-          product: 'Citi Double Cash® Card',
-          headline: '2% flat on everything — simpler than managing quarterly categories',
-          tradeoff: 'No 5% ceiling — flat 2% vs Discover\'s 5% quarters means lower peak earning on bonus categories',
-          whenItWins: 'If you prefer one flat rate over quarterly activation and category tracking',
-          isUpgradePath: false,
-        })
-        alts.push({
-          institution: 'chase',
-          product: 'Chase Sapphire Preferred®',
-          headline: '3x dining + 2x travel, 14 transfer partners',
-          tradeoff: '$95/year fee — the step up to premium rewards once the foundation is solid',
-          whenItWins: 'Once your score reaches 700+ and travel becomes a primary spending category',
-          isUpgradePath: true,
-        })
+        // Primary is Discover it Cash Back (or Citi if wantsSimple)
+        if (wantsSimple) {
+          // Primary is Citi Double Cash — Discover as higher-ceiling alt, Sapphire as upgrade
+          alts.push({
+            institution: 'discover',
+            product: 'Discover it® Cash Back',
+            headline: '5% rotating categories — higher ceiling if you activate quarterly',
+            tradeoff: 'Requires quarterly category activation — more management overhead but higher peak earnings',
+            whenItWins: 'If you decide to optimize categories rather than keep a single flat rate',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel, 14 transfer partners',
+            tradeoff: '$95/year fee — the step up to premium rewards once the foundation is solid',
+            whenItWins: 'Once your score reaches 700+ and travel becomes a primary spending category',
+            isUpgradePath: true,
+          })
+        } else {
+          alts.push({
+            institution: 'citi',
+            product: 'Citi Double Cash® Card',
+            headline: '2% flat on everything — simpler than managing quarterly categories',
+            tradeoff: 'No 5% ceiling — flat 2% vs Discover\'s 5% quarters means lower peak earning on bonus categories',
+            whenItWins: 'If you prefer one flat rate over quarterly activation and category tracking',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel, 14 transfer partners',
+            tradeoff: '$95/year fee — the step up to premium rewards once the foundation is solid',
+            whenItWins: 'Once your score reaches 700+ and travel becomes a primary spending category',
+            isUpgradePath: true,
+          })
+        }
       }
       break
     }
@@ -942,41 +1161,85 @@ function getCreditAlternatives(
           })
         }
       } else if (archetype === 'traditional_hybrid') {
-        // Primary is Chase Freedom Flex
-        alts.push({
-          institution: 'chase',
-          product: 'Chase Freedom Unlimited®',
-          headline: '1.5% base + 3% dining — consistent, no activation required',
-          tradeoff: 'Lower peak rewards than Freedom Flex\'s 5% quarters — but earns reliably without any management',
-          whenItWins: 'If you prefer consistent rewards over maximizing quarterly category bonuses',
-          isUpgradePath: false,
-        })
-        alts.push({
-          institution: 'chase',
-          product: 'Chase Sapphire Preferred®',
-          headline: '3x dining + 2x travel — unlocks full Ultimate Rewards value',
-          tradeoff: '$95/year fee — converts Freedom Flex points from 1¢ to 1.25–2.25¢ each for travel',
-          whenItWins: 'Once you want to use your Chase points for travel — the Sapphire is the unlock that multiplies every Freedom point earned',
-          isUpgradePath: true,
-        })
+        const wantsSimple = answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
+        const primaryIsCiti = wantsSimple
+        if (primaryIsCiti) {
+          // Primary is Citi Double Cash — Chase Freedom Flex as active-management upgrade
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Freedom Flex®',
+            headline: '5% rotating categories — higher ceiling if you activate quarterly',
+            tradeoff: 'Requires quarterly category activation — more management but higher peak earnings than flat 2%',
+            whenItWins: 'If you decide to optimize categories rather than keep flat simplicity',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — unlocks full Ultimate Rewards value',
+            tradeoff: '$95/year fee — converts Freedom Flex points from 1¢ to 1.25–2.25¢ each for travel',
+            whenItWins: 'Once you want to use Chase points for travel — the Sapphire unlocks the full value of every Freedom point earned',
+            isUpgradePath: true,
+          })
+        } else {
+          // Primary is Chase Freedom Flex
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Freedom Unlimited®',
+            headline: '1.5% base + 3% dining — consistent, no activation required',
+            tradeoff: 'Lower peak rewards than Freedom Flex\'s 5% quarters — but earns reliably without any management',
+            whenItWins: 'If you prefer consistent rewards over maximizing quarterly category bonuses',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — unlocks full Ultimate Rewards value',
+            tradeoff: '$95/year fee — converts Freedom Flex points from 1¢ to 1.25–2.25¢ each for travel',
+            whenItWins: 'Once you want to use your Chase points for travel — the Sapphire is the unlock that multiplies every Freedom point earned',
+            isUpgradePath: true,
+          })
+        }
       } else {
-        // Fallback: Chase Freedom Unlimited primary
-        alts.push({
-          institution: 'citi',
-          product: 'Citi Double Cash® Card',
-          headline: '2% flat on everything — 1% when you buy, 1% when you pay',
-          tradeoff: 'No 5% categories or travel transfer partners — flat 2% on every purchase, every time',
-          whenItWins: 'If you want zero category management — one card, one rate, no thinking required',
-          isUpgradePath: false,
-        })
-        alts.push({
-          institution: 'chase',
-          product: 'Chase Sapphire Preferred®',
-          headline: '3x dining + 2x travel — unlocks the full Ultimate Rewards ecosystem',
-          tradeoff: '$95/year — transforms Freedom Unlimited points from 1¢ to 2.25¢ each for travel redemptions',
-          whenItWins: 'Once travel becomes a significant spend category — this card makes every Freedom Unlimited point worth significantly more',
-          isUpgradePath: true,
-        })
+        const wantsSimple = answers.moneyStyle === 'simple_and_clear' || answers.moneyStyle === 'set_and_forget'
+        const primaryIsCiti = wantsSimple
+        if (primaryIsCiti) {
+          // Primary is Citi Double Cash — Chase Freedom Unlimited as upgrade alt
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Freedom Unlimited®',
+            headline: '1.5% base + 3% dining — builds toward Ultimate Rewards',
+            tradeoff: 'Slightly lower flat rate than Citi (1.5% vs 2%) but earns transferable Chase points',
+            whenItWins: 'Once you plan to add a Sapphire card — Freedom Unlimited points become worth 2.25¢+ for travel',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — unlocks the full Ultimate Rewards ecosystem',
+            tradeoff: '$95/year — transforms Freedom Unlimited points from 1¢ to 2.25¢ each for travel redemptions',
+            whenItWins: 'Once travel becomes a significant spend category — this card makes every Freedom point worth significantly more',
+            isUpgradePath: true,
+          })
+        } else {
+          // Fallback: Chase Freedom Unlimited primary
+          alts.push({
+            institution: 'citi',
+            product: 'Citi Double Cash® Card',
+            headline: '2% flat on everything — 1% when you buy, 1% when you pay',
+            tradeoff: 'No 5% categories or travel transfer partners — flat 2% on every purchase, every time',
+            whenItWins: 'If you want zero category management — one card, one rate, no thinking required',
+            isUpgradePath: false,
+          })
+          alts.push({
+            institution: 'chase',
+            product: 'Chase Sapphire Preferred®',
+            headline: '3x dining + 2x travel — unlocks the full Ultimate Rewards ecosystem',
+            tradeoff: '$95/year — transforms Freedom Unlimited points from 1¢ to 2.25¢ each for travel redemptions',
+            whenItWins: 'Once travel becomes a significant spend category — this card makes every Freedom Unlimited point worth significantly more',
+            isUpgradePath: true,
+          })
+        }
       }
       break
     }
@@ -1264,6 +1527,13 @@ const CHECKING_POOL: Partial<Record<InstitutionId, CompRowBase>> = {
     fee: '$0/month',
     caveat: 'Unlimited worldwide ATM rebates',
   },
+  fidelity: {
+    institution: 'fidelity',
+    product: 'Cash Management Account',
+    stat: '~2.7% on uninvested cash',
+    fee: '$0/month',
+    caveat: 'Yield depends on money market fund; no dedicated HYSA',
+  },
   wells_fargo: {
     institution: 'wells_fargo',
     product: 'Everyday Checking',
@@ -1286,6 +1556,8 @@ const CHECKING_ALTS: Partial<Record<InstitutionId, InstitutionId[]>> = {
   capital_one: ['sofi', 'chase'],
   chase:       ['capital_one', 'wells_fargo'],
   discover:    ['sofi', 'capital_one'],
+  schwab:      ['fidelity', 'sofi'],
+  ally:        ['sofi', 'capital_one'],
 }
 
 function buildCheckingComparisons(selected: InstitutionId): ComparisonRow[] {
@@ -1372,6 +1644,7 @@ const CREDIT_STAGE_POOL: Record<CreditStageId, CreditCompBase[]> = {
   emerging_optimizer: [
     { institution: 'chase',       product: 'Freedom Unlimited®',       stat: '1.5% base + 3% dining',         fee: '$0/year',  caveat: null },
     { institution: 'discover',    product: 'Discover it® Cash Back',   stat: '5% rotating + 1% base',         fee: '$0/year',  caveat: null },
+    { institution: 'citi',        product: 'Double Cash® Card',        stat: '2% flat on everything',         fee: '$0/year',  caveat: '1% buy + 1% pay' },
     { institution: 'amex',        product: 'Blue Cash Everyday®',      stat: '3% groceries + 2% gas',         fee: '$0/year',  caveat: null },
   ],
   rewards_optimizer: [
@@ -1386,6 +1659,7 @@ const CREDIT_STAGE_POOL: Record<CreditStageId, CreditCompBase[]> = {
 // pool's canonical entry for that institution (e.g. Freedom Flex vs Sapphire Preferred),
 // the recommended row is updated to reflect the real recommendation.
 const CREDIT_PRODUCT_OVERRIDES: Partial<Record<string, Pick<CreditCompBase, 'product' | 'stat' | 'fee' | 'caveat'>>> = {
+  'Citi Double Cash® Card':              { product: 'Double Cash® Card',     stat: '2% flat on everything',    fee: '$0/year',  caveat: '1% buy + 1% pay' },
   'Chase Freedom Flex®':                 { product: 'Freedom Flex®',         stat: '5% rotating + 3% dining',  fee: '$0/year',  caveat: 'Quarterly activation required' },
   'Chase Freedom Unlimited®':           { product: 'Freedom Unlimited®',    stat: '1.5% base + 3% dining',    fee: '$0/year',  caveat: null },
   'Chase Sapphire Preferred®':          { product: 'Sapphire Preferred®',   stat: '3x dining + 2x travel',    fee: '$95/year', caveat: null },

@@ -54,6 +54,18 @@ export type CheckingPreference =
   | 'mobile_app'    // Great mobile app
   | 'branch_access' // Physical branch access
 
+export type PaymentFrequency =
+  | 'direct_deposit'   // Regular paycheck auto-deposited
+  | 'irregular_cash'   // Variable pay, tips, or cash-based
+  | 'business_income'  // Invoices, ACH, self-employment
+  | 'no_income'        // Student, between jobs, not earning
+
+export type MoneyStyle =
+  | 'set_and_forget'      // Automated, runs without thinking
+  | 'hands_on'            // Actively tracks and optimizes
+  | 'simple_and_clear'    // Wants simple rules, no categories
+  | 'maximize_everything' // Researches every rate and bonus
+
 export interface UserAnswers {
   income: IncomeLevel
   creditSituation: CreditSituation
@@ -63,6 +75,8 @@ export interface UserAnswers {
   debtSituation: DebtSituation
   retirement: RetirementSituation
   checkingPreference: CheckingPreference
+  paymentFrequency?: PaymentFrequency
+  moneyStyle?: MoneyStyle
 }
 
 // ─── Domain Types ──────────────────────────────────────────────────────────────
