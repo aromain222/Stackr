@@ -16,7 +16,7 @@ import { INVESTING_READINESS } from '@/lib/investing'
 import { getRetirementStatusColor } from '@/lib/retirement'
 import { loadAnswers, saveMeta, clearProfile } from '@/lib/storage'
 import { track } from '@/lib/analytics'
-import type { StackOutput, Recommendation, AlternativeRecommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow } from '@/lib/types'
+import type { StackOutput, Recommendation, AlternativeRecommendation, PlanningLayer, PlanningCategory, SupportBlock, ComparisonRow, InstitutionId } from '@/lib/types'
 import { EducationPanelProvider, EducationTrigger } from '@/components/ui/education-panel'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -165,6 +165,46 @@ function GeneratingScreen() {
   )
 }
 
+// ─── Institution logo with fallback ───────────────────────────────────────────
+
+function InstitutionLogo({ id, size = 24 }: { id: InstitutionId; size?: number }) {
+  const inst = INSTITUTIONS[id]
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return (
+      <span
+        className="flex-shrink-0 rounded-sm flex items-center justify-center font-bold text-white"
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: inst.color,
+          fontSize: Math.round(size * 0.5),
+        }}
+      >
+        {inst.name[0]}
+      </span>
+    )
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <span
+      className="flex-shrink-0 rounded-sm overflow-hidden bg-white flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <img
+        src={inst.logoUrl}
+        alt={inst.name}
+        width={size}
+        height={size}
+        onError={() => setFailed(true)}
+        className="w-full h-full object-contain"
+      />
+    </span>
+  )
+}
+
 // ─── Stack map row (expandable) ────────────────────────────────────────────────
 
 function StackMapRow({
@@ -215,10 +255,11 @@ function StackMapRow({
           <p className="text-xs text-[#7C8599] mt-0.5">{rec.headline}</p>
         </div>
         <span
-          className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0"
+          className="inline-flex items-center gap-1.5 text-xs font-medium pl-1 pr-2.5 py-1 rounded-full flex-shrink-0"
           style={{ backgroundColor: meta.dimColor, color: meta.color }}
         >
-          {inst.name}
+          <InstitutionLogo id={rec.institution} size={22} />
+          <span className="hidden sm:inline">{inst.name}</span>
         </span>
         <ChevronDown
           className={`w-4 h-4 text-[#4A5166] flex-shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
@@ -424,7 +465,8 @@ function AlternativeCard({
     <div className="rounded-xl border border-[#1C2030] bg-[#0E1018] p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <InstitutionLogo id={alt.institution} size={24} />
             <span className="text-xs font-medium text-[#7C8599]">{inst.name}</span>
             <span className="text-xs text-[#2D3247]">·</span>
             <span className="text-xs text-[#4A5166] truncate">{alt.product}</span>
