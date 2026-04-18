@@ -26,7 +26,7 @@ export interface InstitutionMeta {
   openAccountUrl: string | null
   /** URL for credit card application — null if no card products */
   applyUrl: string | null
-  /** Clearbit logo URL — used for display in recommendation and alternative cards */
+  /** Logo URL for display in recommendation and alternative cards */
   logoUrl: string
 }
 
@@ -54,7 +54,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Digital-first users who will route their paycheck through SoFi to unlock the full rate',
     openAccountUrl: 'https://www.sofi.com/banking/',
     applyUrl: null,
-    logoUrl: 'https://logo.clearbit.com/sofi.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=sofi.com&sz=128',
   },
 
   capital_one: {
@@ -80,7 +80,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Users who want competitive savings yield with no strings attached',
     openAccountUrl: 'https://www.capitalone.com/bank/checking-accounts/',
     applyUrl: 'https://www.capitalone.com/credit-cards/secured/',
-    logoUrl: 'https://logo.clearbit.com/capitalone.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=capitalone.com&sz=128',
   },
 
   amex: {
@@ -106,7 +106,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Adding a high-yield savings account without changing your primary checking bank',
     openAccountUrl: 'https://www.americanexpress.com/en-us/banking/online-savings/',
     applyUrl: 'https://www.americanexpress.com/us/credit-cards/',
-    logoUrl: 'https://logo.clearbit.com/americanexpress.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=americanexpress.com&sz=128',
   },
 
   chase: {
@@ -132,7 +132,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Branch access, ecosystem breadth, and the best card rewards program in traditional banking',
     openAccountUrl: 'https://www.chase.com/personal/checking',
     applyUrl: 'https://creditcards.chase.com/',
-    logoUrl: 'https://logo.clearbit.com/chase.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=chase.com&sz=128',
   },
 
   ally: {
@@ -158,7 +158,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Clean online banking with competitive, no-condition rates and strong savings tooling',
     openAccountUrl: 'https://www.ally.com/bank/online-savings-account/',
     applyUrl: null,
-    logoUrl: 'https://logo.clearbit.com/ally.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=ally.com&sz=128',
   },
 
   discover: {
@@ -184,7 +184,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Debit cashback and no-annual-fee credit cards for every credit stage',
     openAccountUrl: 'https://www.discover.com/online-banking/checking-account/',
     applyUrl: 'https://www.discover.com/credit-cards/cash-back/it-card.html',
-    logoUrl: 'https://logo.clearbit.com/discover.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=discover.com&sz=128',
   },
 
   fidelity: {
@@ -210,7 +210,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Zero-cost index fund investing and maximizing tax-advantaged retirement contributions',
     openAccountUrl: 'https://www.fidelity.com/open-account/overview',
     applyUrl: null,
-    logoUrl: 'https://logo.clearbit.com/fidelity.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=fidelity.com&sz=128',
   },
 
   schwab: {
@@ -236,7 +236,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Investors who want checking and brokerage under one roof, especially frequent travelers',
     openAccountUrl: 'https://www.schwab.com/open-an-account',
     applyUrl: null,
-    logoUrl: 'https://logo.clearbit.com/schwab.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=schwab.com&sz=128',
   },
 
   wells_fargo: {
@@ -262,7 +262,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Users who need in-person branch access in regions where Chase has limited presence',
     openAccountUrl: 'https://www.wellsfargo.com/checking/',
     applyUrl: 'https://www.wellsfargo.com/credit-cards/',
-    logoUrl: 'https://logo.clearbit.com/wellsfargo.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=wellsfargo.com&sz=128',
   },
 
   bank_of_america: {
@@ -288,7 +288,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Customers with $20k+ in combined deposits who want amplified rewards through Preferred Rewards',
     openAccountUrl: 'https://www.bankofamerica.com/deposits/checking/checking-accounts/',
     applyUrl: 'https://www.bankofamerica.com/credit-cards/',
-    logoUrl: 'https://logo.clearbit.com/bankofamerica.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=bankofamerica.com&sz=128',
   },
 
   marcus: {
@@ -314,7 +314,7 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'Users who want a standalone HYSA from a name-brand institution with absolutely no conditions',
     openAccountUrl: 'https://www.marcus.com/us/en/savings/high-yield-savings',
     applyUrl: null,
-    logoUrl: 'https://logo.clearbit.com/marcus.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=marcus.com&sz=128',
   },
 
   citi: {
@@ -340,6 +340,6 @@ export const INSTITUTIONS: Record<InstitutionId, InstitutionMeta> = {
     bestFor: 'The absolute simplest 2% flat cashback card — no categories, no activation, no quarterly management',
     openAccountUrl: 'https://www.citi.com/banking/checking',
     applyUrl: 'https://www.citi.com/credit-cards/compare/double-cash-credit-card',
-    logoUrl: 'https://logo.clearbit.com/citi.com',
+    logoUrl: 'https://www.google.com/s2/favicons?domain=citi.com&sz=128',
   },
 }
